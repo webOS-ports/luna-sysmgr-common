@@ -221,6 +221,10 @@ public:
 	
 	bool displayUiRotates;
 	bool tabletUi;
+	qreal dpi;
+	qreal pixmapFactor;
+	qreal layoutScale;
+	qreal pixmapScale;
 	int  homeButtonOrientationAngle;
 
 	int positiveSpaceTopPadding;

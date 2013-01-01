@@ -203,6 +203,10 @@ Settings::Settings()
 	, fontStatusBar("Prelude")
 	, displayUiRotates(false)
 	, tabletUi(false)
+	, dpi(132)
+	, pixmapFactor(4.0)
+	, layoutScale(1.0)
+	, pixmapScale(0.25)
 	, homeButtonOrientationAngle(0)
 	, positiveSpaceTopPadding(24)
 	, positiveSpaceBottomPadding(24)
@@ -493,6 +497,8 @@ void Settings::load(const char* settingsFile)
 
 	KEY_BOOLEAN("UI", "DisplayUiRotates", displayUiRotates);
 	KEY_BOOLEAN("UI", "TabletUi", tabletUi);
+	KEY_INTEGER("UI", "DPI", dpi);
+	KEY_DOUBLE("UI", "PixmapFactor", pixmapFactor);
 	KEY_INTEGER("UI", "HomeButtonOrientationAngle", homeButtonOrientationAngle);
 	KEY_INTEGER("UI", "PositiveSpaceTopPadding", positiveSpaceTopPadding);
 	KEY_INTEGER("UI", "PositiveSpaceBottomPadding", positiveSpaceBottomPadding);
@@ -693,8 +699,16 @@ void Settings::postLoad()
 
 	// packageInstallBase has to be == to appInstallBase for now (at least in version=blowfish timeframe)
 	packageInstallBase = appInstallBase;
-
-	// Piranha flags
+	
+	//Calculate UI Scaling
+	layoutScale = dpi / 132; //132 is the base DPI for luna and it's assets
+	pixmapScale = layoutScale / pixmapFactor;
+	
+	positiveSpaceTopPadding *= layoutScale;
+	positiveSpaceBottomPadding *= layoutScale;
+	statusBarTitleMaxWidth *= layoutScale;
+	gapBetweenCardGroups *= layoutScale;
+	splashIconSize *= layoutScale;
 }
 
 // Expands "1MB" --> 1048576, "2k" --> 2048, etc.
