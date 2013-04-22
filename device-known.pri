@@ -69,3 +69,9 @@ contains(MACHINE_NAME, "tuna") {
     CONFIG_BUILD += opengl
     LIBS += -lqpalm
 }
+contains(MACHINE_NAME, "grouper") {
+    DEFINES += MACHINE_TUNA HAS_DISPLAY_TIMEOUT HAS_PALM_QPA
+    CONFIG_BUILD += webosdevice nyx
+    CONFIG_BUILD += opengl
+    LIBS += -lqpalm
+}
