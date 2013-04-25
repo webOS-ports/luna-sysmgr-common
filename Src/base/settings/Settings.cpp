@@ -204,8 +204,10 @@ Settings::Settings()
 	, displayUiRotates(false)
 	, tabletUi(false)
 	, dpi(132)
+	, compatDpi(132)
 	, pixmapFactor(4.0)
 	, layoutScale(1.0)
+	, layoutScaleCompat(1.0)
 	, pixmapScale(0.25)
 	, homeButtonOrientationAngle(0)
 	, positiveSpaceTopPadding(24)
@@ -498,6 +500,7 @@ void Settings::load(const char* settingsFile)
 	KEY_BOOLEAN("UI", "DisplayUiRotates", displayUiRotates);
 	KEY_BOOLEAN("UI", "TabletUi", tabletUi);
 	KEY_INTEGER("UI", "DPI", dpi);
+	KEY_INTEGER("UI", "CompatDPI", compatDpi);
 	KEY_DOUBLE("UI", "PixmapFactor", pixmapFactor);
 	KEY_INTEGER("UI", "HomeButtonOrientationAngle", homeButtonOrientationAngle);
 	KEY_INTEGER("UI", "PositiveSpaceTopPadding", positiveSpaceTopPadding);
@@ -562,6 +565,19 @@ void Settings::load(const char* settingsFile)
 	KEY_STRING( "General", "LogFileName", logFileName);
 
     KEY_INTEGER("General", "schemaValidationOption", schemaValidationOption);
+
+	gchar** compatAppsStr = g_key_file_get_string_list(keyfile, "UI", "CompatApps", NULL, NULL);
+	if (compatAppsStr) {
+		int index = 0;
+		compatApps.clear();
+		while (compatAppsStr[index]) {
+			compatApps.insert(compatAppsStr[index]);
+			SETTINGS_TRACE("Compat app: %s\n", compatAppsStr[index]);
+			++index;
+		}
+
+		g_strfreev(compatAppsStr);
+	}
 
 
 	// apps to launch at boot time
@@ -702,6 +718,7 @@ void Settings::postLoad()
 	
 	//Calculate UI Scaling
 	layoutScale = dpi / 132; //132 is the base DPI for luna and it's assets
+	layoutScaleCompat = compatDpi / 132;
 	pixmapScale = layoutScale / pixmapFactor;
 	
 	positiveSpaceTopPadding *= layoutScale;
