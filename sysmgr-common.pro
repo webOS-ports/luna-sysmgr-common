@@ -137,3 +137,11 @@ DESTDIR = ./$${BUILD_TYPE}-$${MACHINE_NAME}
 OBJECTS_DIR = $$DESTDIR/.obj
 MOC_DIR = $$DESTDIR/.moc
 
+CONFIG += create_pc create_prl no_install_prl
+
+QMAKE_PKGCONFIG_NAME = LunaSysMgrCommon
+QMAKE_PKGCONFIG_DESCRIPTION = Provides header files and source code common to luna-sysmgr and webappmanager
+QMAKE_PKGCONFIG_PREFIX = $$INSTALLBASE
+QMAKE_PKGCONFIG_LIBDIR = $$target.path
+QMAKE_PKGCONFIG_CFLAGS = -Iluna-sysmgr-common
+QMAKE_PKGCONFIG_VERSION = $$VERSION
