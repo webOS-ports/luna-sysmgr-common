@@ -51,6 +51,7 @@ OBJECTS_DIR = .obj
 MOC_DIR = .moc
 
 SOURCES += \
+    AnimationSettings.cpp \
     ApplicationDescriptionBase.cpp \
     AsyncCaller.cpp \
     HostBase.cpp \
@@ -67,6 +68,8 @@ SOURCES += \
     WindowProperties.cpp
 
 HEADERS += \
+    AnimationSettings.h \
+    AnimationEquations.h \
     ApplicationDescriptionBase.h \
     AsyncCaller.h \
     Common.h \
