@@ -114,6 +114,10 @@ Settings::Settings()
         , backlightDarkScale (10)
 	, displayWidth(320)
 	, displayHeight(320)
+        , tileWidth(512)
+        , tileHeight(512)
+        , nonPowerOfTwoUpdateAtlas(false)
+        , numberOfUpdateAtlases(5)
 	, gestureAreaHeight(50)
 	, displayNumBuffers(3)
 	, ledPulseMaxBrightness (100)
@@ -411,6 +415,9 @@ void Settings::load(const char* settingsFile)
     KEY_BOOLEAN( "Memory", "AllowAllAppsInLowMemory", allowAllAppsInLowMemory);
 	KEY_INTEGER( "General","DisplayWidth",displayWidth);
 	KEY_INTEGER( "General","DisplayHeight",displayHeight);
+	KEY_INTEGER("General", "TileWidth", tileWidth);
+	KEY_INTEGER("General", "TileHeight", tileHeight);
+	KEY_BOOLEAN("General", "NonPowerOfTwoUpdateAtlas", nonPowerOfTwoUpdateAtlas);
 	KEY_INTEGER( "General","GestureAreaHeight",gestureAreaHeight);
 	KEY_INTEGER( "General","DisplayNumBuffers", displayNumBuffers);
 	KEY_INTEGER("General", "MaxPenMoveFreq", maxPenMoveFreq);

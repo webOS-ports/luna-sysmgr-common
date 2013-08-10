@@ -96,6 +96,10 @@ public:
 	
 	int					displayWidth;
 	int					displayHeight;
+        int                 tileWidth;
+        int                 tileHeight;
+        bool                nonPowerOfTwoUpdateAtlas;
+        int                 numberOfUpdateAtlases;
 	int					gestureAreaHeight;
 	int                 displayNumBuffers;
 
