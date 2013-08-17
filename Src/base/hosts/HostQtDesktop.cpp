@@ -149,7 +149,7 @@ public:
 
 		if ((velocity.y() * velocity.y()) > (velocity.x() * velocity.x())) {
            if (velocity.y() > 0)
-               postGesture(KEYS::Key_CoreNavi_SwipeDown);
+               postGesture(Key_CoreNavi_SwipeDown);
            else
                postGesture(KEYS::Key_CoreNavi_Launcher);
 			m_seenGesture = true;

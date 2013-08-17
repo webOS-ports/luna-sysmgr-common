@@ -1,6 +1,5 @@
 Summary
 ========
-
 Provides header files and source code common to luna-sysmgr and webappmanager
 
 
