@@ -20,9 +20,6 @@
 #define HOSTBASE_H
 
 #include "Common.h"
-
-
-
 #include "TaskBase.h"
 #include "Mutex.h"
 #include "CustomEvents.h"
@@ -52,7 +49,6 @@ class HostBase : public QObject,
 {
     Q_OBJECT
 public:
-
 	static HostBase* instance();
 	virtual ~HostBase();
 

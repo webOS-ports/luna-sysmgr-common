@@ -30,29 +30,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#if defined(TARGET_DESKTOP)
-	#include "HostQtDesktop.h"
-#else
-	#include "HostArm.cpp"
-	#if defined(TARGET_EMULATOR)
-		#include "HostArmQemu.cpp"
-	#elif defined(MACHINE_BROADWAY)
-		#include "HostArmBroadway.cpp"
-	#elif defined(MACHINE_MANTARAY)
-		#include "HostArmMantaray.cpp"
-	#elif defined(MACHINE_TOPAZ)
-		#include "HostArmTopaz.cpp"
-	#elif defined(MACHINE_OPAL)
-		#include "HostArmOpal.cpp"
-	#elif defined(MACHINE_WINDSORNOT)
-		#include "HostArmWindsorNot.cpp"
-	#else
-		#include "HostArmUnknown.cpp"
-	#endif
-#endif
+#include "HostUnknown.h"
 
 static HostBase* sInstance = 0;
-
 
 bool HostBase::hostIsQemu() {
 
@@ -84,25 +64,8 @@ bool HostBase::hostIsQemu() {
 
 HostBase* HostBase::instance()
 {
-    if (!sInstance) {
-#if defined(TARGET_DESKTOP)
-		new HostQtDesktop;
-#elif defined(TARGET_EMULATOR)
-		new HostArmQemu;
-#elif defined(MACHINE_BROADWAY)
-		new HostArmBroadway;
-#elif defined(MACHINE_MANTARAY)
-		new HostArmMantaray;
-#elif defined(MACHINE_TOPAZ)
-		new HostArmTopaz;
-#elif defined(MACHINE_OPAL)
-		new HostArmOpal;
-#elif defined(MACHINE_WINDSORNOT)
-		new HostArmWindsorNot;
-#else
-		new HostArmUnknown;
-#endif
-	}
+	if (!sInstance)
+		new HostUnknown;
 
 	return sInstance;
 }
