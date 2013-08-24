@@ -23,6 +23,7 @@
 
 #include "Settings.h"
 
+#include <QFile>
 #include <QHash>
 #include <stdio.h>
 #include <string.h>
@@ -54,6 +55,21 @@ do { \
 
 #endif
 
+static const char* hardwareTypeToString(Settings::HardwareType type)
+{
+	switch (type) {
+	case Settings::HardwareTypeEmulator:
+		return "emulator";
+	case Settings::HardwareTypeDesktop:
+		return "desktop";
+	case Settings::HardwareTypeDevice:
+		return "device";
+	default:
+		break;
+	}
+
+	return "unknown";
+}
 
 unsigned long MemStringToBytes( const char* ptr );
 
@@ -253,13 +269,26 @@ Settings::Settings()
     , cardDimmPercentage(0.8f)
     , schemaValidationOption(0)
     , allowAllAppsInLowMemory(false)
+	, hardwareName("unknown")
+	, hardwareType(HardwareTypeDesktop)
 {
-    allSettings = new QHash<QString, QVariant>();
+	allSettings = new QHash<QString, QVariant>();
+
+	identifyHardware();
+
 	load(kSettingsFile);
 	load(kSettingsFilePlatform);
 
+	std::string settingsFileHardware = "/etc/palm/luna-";
+	settingsFileHardware += hardwareName;
+	settingsFileHardware += ".conf";
+	load(settingsFileHardware.c_str());
+
 	postLoad();
 
+
+	g_message("Running on %s with hardware type %s",
+		hardwareName.c_str(), hardwareTypeToString(hardwareType));
 }
 
 Settings::~Settings()
@@ -573,6 +602,15 @@ void Settings::load(const char* settingsFile)
 
     KEY_INTEGER("General", "schemaValidationOption", schemaValidationOption);
 
+	std::string type = "desktop";
+	KEY_STRING("Hardware", "Type", type);
+	if (type == "emulator")
+		hardwareType = HardwareTypeEmulator;
+	else if (type == "desktop")
+		hardwareType = HardwareTypeDesktop;
+	else if (type == "device")
+		hardwareType = HardwareTypeDevice;
+
 	gchar** compatAppsStr = g_key_file_get_string_list(keyfile, "UI", "CompatApps", NULL, NULL);
 	if (compatAppsStr) {
 		int index = 0;
@@ -781,4 +819,39 @@ void Settings::createNeededFolders()
 QVariant Settings::getSetting(const QString &key) const
 {
     return allSettings->value(key);
+}
+
+void Settings::identifyHardware()
+{
+	QFile cpuinfo("/proc/cpuinfo");
+
+	if (!cpuinfo.exists()) {
+		qWarning("Unable to determine hardware as /proc/cpuinfo isn't available");
+		return;
+	}
+
+	if (!cpuinfo.open(QIODevice::ReadOnly)) {
+		qWarning("Unable to read hardware information from /proc/cpuinfo");
+		return;
+	}
+
+	QString hwname = "unknown";
+
+	while (true) {
+		QByteArray line = cpuinfo.readLine();
+
+		if (line.startsWith("Hardware") || line.startsWith("vendor_id")) {
+			QList<QByteArray> parts = line.split(':');
+
+			hwname = parts.count() == 2 ? parts.at(1) : "unknown";
+			hwname.replace(" ", "");
+			hwname.replace("\n", "");
+
+			hardwareName = hwname.toLower().toStdString();
+
+			break;
+		}
+	}
+
+	cpuinfo.close();
 }

@@ -287,6 +287,15 @@ public:
     float cardDimmPercentage;
     int schemaValidationOption;
 
+	enum HardwareType {
+		HardwareTypeDevice,
+		HardwareTypeEmulator,
+		HardwareTypeDesktop,
+	};
+
+	std::string hardwareName;
+	HardwareType hardwareType;
+
 	static inline Settings*  LunaSettings() {
 		if (G_LIKELY(s_settings))
 			return s_settings;
@@ -303,6 +312,7 @@ public:
 private:
 	void load(const char* settingsFile);
 	void postLoad();
+	void identifyHardware();
 	Settings();
 	~Settings();
 
