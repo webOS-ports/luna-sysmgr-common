@@ -815,9 +815,9 @@ InputControl* HostArm::getInputControlTouchpanel()
 {
     if (m_nyxInputControlTouchpanel)
         return m_nyxInputControlTouchpanel;
-#if defined(HAS_QPA) && defined(HAS_PALM_QPA)
-    m_nyxInputControlTouchpanel = getTouchpanel();
-#endif
+
+    m_nyxInputControlTouchpanel = new NyxInputControl(NYX_DEVICE_TOUCHPANEL, "Main");
+
     if (!m_nyxInputControlTouchpanel)
         g_critical("Unable to obtain m_nyxInputControlTouchpanel");
     return m_nyxInputControlTouchpanel;
