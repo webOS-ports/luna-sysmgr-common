@@ -65,6 +65,7 @@ set(SOURCES
     Src/base/settings/LocalePreferences.cpp
     Src/base/settings/AnimationSettings.cpp
     Src/base/hosts/HostBase.cpp
+    Src/base/hosts/HostArm.cpp
     Src/base/hosts/HostUnknown.h
     Src/base/JSONUtils.cpp
     Src/base/Utils.cpp

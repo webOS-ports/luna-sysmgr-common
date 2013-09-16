@@ -31,6 +31,9 @@
 #include <fcntl.h>
 
 #include "HostUnknown.h"
+#include "HostArm.h"
+
+#include "Settings.h"
 
 static HostBase* sInstance = 0;
 
@@ -64,8 +67,12 @@ bool HostBase::hostIsQemu() {
 
 HostBase* HostBase::instance()
 {
-	if (!sInstance)
-		new HostUnknown;
+	if (!sInstance) {
+		if (Settings::LunaSettings()->hardwareType == Settings::HardwareTypeDevice)
+			new HostArm;
+		else
+			new HostUnknown;
+	}
 
 	return sInstance;
 }
