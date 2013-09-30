@@ -64,6 +64,7 @@ set(SOURCES
     Src/base/settings/Settings.cpp
     Src/base/settings/LocalePreferences.cpp
     Src/base/settings/AnimationSettings.cpp
+    Src/base/settings/Preferences.cpp
     Src/base/hosts/HostBase.cpp
     Src/base/hosts/HostArm.cpp
     Src/base/hosts/HostUnknown.h
@@ -86,7 +87,8 @@ set(SOURCES
     include/ProcessKiller.h
     include/LocalePreferences.h
     include/HostBase.h
-    include/NyxSensorConnector.h)
+    include/NyxSensorConnector.h
+    include/Preferences.h)
 
 add_library(LunaSysMgrCommon SHARED ${SOURCES})
 target_link_libraries(LunaSysMgrCommon
