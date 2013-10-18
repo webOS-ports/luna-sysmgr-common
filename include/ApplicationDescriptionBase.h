@@ -32,7 +32,8 @@ public:
         Type_Native,
         Type_PDK,
         Type_SysmgrBuiltin,
-        Type_Qt
+        Type_Qt,
+        Type_QML
     };
 
     ApplicationDescriptionBase();
