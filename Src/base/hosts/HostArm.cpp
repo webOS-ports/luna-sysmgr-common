@@ -23,8 +23,6 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <string.h>
-#include <linux/fb.h>
-#include <linux/kd.h>
 #include <linux/input.h> 
 #include <sys/mman.h>
 #include <sys/ioctl.h>
@@ -75,12 +73,6 @@
 
 #define HOSTARM_LOG	"HostArm"
 
-#if !defined(FBIO_WAITFORVSYNC)
-#define FBIO_WAITFORVSYNC	_IOW('F', 0x20, u_int32_t)
-#endif
-
-
-
 #if defined(HAS_QPA) && defined(HAS_PALM_QPA)
 // From the Palm QPA
 extern "C" void setTransform(QTransform*);
@@ -102,12 +94,6 @@ HostArm::HostArm() :
 	, m_hwRev(HidHardwareRevisionEVT1)
 	, m_hwPlatform (HidHardwarePlatformCastle)
 #endif
-	, m_fb0Fd(-1)
-	, m_fb1Fd(-1)
-	, m_fb0Buffer(0)
-	, m_fb0NumBuffers(0)
-	, m_fb1Buffer(0)
-	, m_fb1NumBuffers(1)
 	, m_service(NULL)
 	, m_nyxInputControlALS(0)
 	, m_nyxInputControlBluetoothInputDetect(0)
@@ -152,126 +138,10 @@ void HostArm::init(int w, int h)
 {
 	// turn off turbo mode if in case sysmgr died with it being previously enabled
 	turboMode(false);
-	
-	// Need to wake up the display before opening the fb
-	wakeUpLcd();
-
-	// Get the display info ---------------------------------------------
-	
-	m_fb0Fd = open("/dev/fb0", O_RDWR);
-	if (m_fb0Fd < 0) {
-		fprintf(stderr, "Failed to open framebuffer device\n");
-        return;
-    }
-
-	(void) ::ioctl(m_fb0Fd, FBIOBLANK, FB_BLANK_UNBLANK);
-	
-    struct fb_var_screeninfo varinfo;
-	memset(&varinfo, 0, sizeof(varinfo));
-
-    ioctl(m_fb0Fd, FBIOGET_VSCREENINFO, &varinfo);	
-	
-	m_info.displayWidth = varinfo.xres;
-	m_info.displayHeight = varinfo.yres;
-	m_info.displayRowBytes = varinfo.xres * varinfo.bits_per_pixel / 8;
-	m_info.displayDepth = varinfo.bits_per_pixel;
-	m_info.displayRedLength = varinfo.red.length;
-	m_info.displayGreenLength = varinfo.green.length;
-	m_info.displayBlueLength = varinfo.blue.length;
-	m_info.displayAlphaLength = varinfo.transp.length;
-
-	struct fb_fix_screeninfo fixinfo;
-	int ret;
-
-	memset(&fixinfo, 0, sizeof(fb_fix_screeninfo));
-	ret = ::ioctl(m_fb0Fd, FBIOGET_FSCREENINFO, &fixinfo);
-
-	if (ret < 0) {
-		g_warning("Failed to get fscreeninfo: %s", strerror(errno));
-		return;
-	}
-
-	m_fb0Buffer = ::mmap(0, fixinfo.smem_len, PROT_READ, MAP_SHARED, m_fb0Fd, 0);
-	if (m_fb0Buffer == MAP_FAILED) {
-		g_warning("Failed to map fb1 buffer: %s", strerror(errno));
-		m_fb0Buffer = 0;
-		return;
-	}
-
-	int bpp = varinfo.bits_per_pixel;
-	int rowBytes = varinfo.xres * (bpp >> 3);
-	m_fb0NumBuffers = fixinfo.smem_len / (rowBytes * varinfo.yres);
-	
-	// Setup the fb1 display.
-	
-	m_fb1Fd = open("/dev/fb1", O_RDWR, 0);
-	if (m_fb1Fd < 0) {
-		g_warning("Failed to open layer 1: %s", strerror(errno));
-		return;
-	}
-
-#if defined(FB1_POWER_OPTIMIZATION)
-	// Turn off fb1 if it was previously enabled
-	(void) ::ioctl(m_fb1Fd, FBIOBLANK, FB_BLANK_POWERDOWN);
-#else
-	(void) ::ioctl(m_fb1Fd, FBIOBLANK, FB_BLANK_UNBLANK);
-#endif	
-	
-	ret = ::ioctl(m_fb1Fd, FBIOGET_FSCREENINFO, &fixinfo);
-
-	if (ret < 0) {
-		g_warning("Failed to get fscreeninfo: %s", strerror(errno));
-		return;
-	}
-
-	m_fb1Buffer = ::mmap(0, fixinfo.smem_len, PROT_READ, MAP_SHARED, m_fb1Fd, 0);
-	if (m_fb1Buffer == MAP_FAILED) {
-		g_warning("Failed to map fb1 buffer: %s", strerror(errno));
-		m_fb1Buffer = 0;
-		return;
-	}
-
-	memset(&varinfo, 0, sizeof(varinfo));
-	ioctl(m_fb1Fd, FBIOGET_VSCREENINFO, &varinfo);	
-
-	bpp = varinfo.bits_per_pixel;
-	rowBytes = varinfo.xres * (bpp >> 3);
-	m_fb1NumBuffers = fixinfo.smem_len / (rowBytes * varinfo.yres);
-
-	printf("Linux Fb0: Num Buffers: %d, Fb1: Num Buffers: %d\n", m_fb0NumBuffers, m_fb1NumBuffers);
-#if defined(HAS_QPA) && defined(HAS_PALM_QPA)
-// From the Palm QPA
-	setTransform(&m_trans);
-#endif
 }
 
 void HostArm::disableScreenBlanking()
 {
-    int err;
-    
-	int fd = open ("/dev/tty0", O_RDWR);
-    if (fd == -1) {
-		fprintf(stderr, "failed to open /dev/tty0");
-		return;
-    }
-
-	// This appears to be the magic, secret voodoo to keep the screen
-	// from blanking while parts is running...
-
-	err = ioctl(fd, TIOCLINUX, "\x4") ||    // Restore screen from sleep
-          ioctl(fd, TIOCLINUX, "\xa\0");	// Disable screen sleep
-    if (err != 0) {
-        fprintf(stderr, "faild to disable screen blanking\n");
-		return;
-    }   
-
-    err = ioctl(fd, KDSETMODE, KD_GRAPHICS);	// Get rid of the cursor
-    if (err != 0) {
-        fprintf(stderr, "faild to disable cursor\n");
-		return;
-    }   
-
-    return;
 }
 
 #if 0
@@ -543,7 +413,6 @@ void HostArm::setCentralWidget(QWidget* view)
 
 void HostArm::show()
 {
-    disableScreenBlanking();
     startService();
     setupInput();
 #if defined(HAS_HIDLIB)
@@ -642,111 +511,32 @@ Error:
 
 void HostArm::flip()
 {
-	bool needFlip = true;
-
-#if defined(HAVE_OPENGL)
-	if (!Settings::LunaSettings()->forceSoftwareRendering)
-		needFlip = false;
-#endif
-
-	if (!needFlip)
-		return;
-
-	// force a buffer "flip" in software
-	if (m_fb0Fd < 0)
-		return;
-
-	struct fb_var_screeninfo screeninfo;
-	int rc = ::ioctl(m_fb0Fd, FBIOGET_VSCREENINFO, &screeninfo);
-	Q_ASSERT_X(rc >= 0, __PRETTY_FUNCTION__, "ioctl(FBIOGET_VSCREENINFO) failed");
-
-	if (rc < 0)
-		return;
-
-	screeninfo.xoffset = 0;
-	screeninfo.yoffset = 0;
-
-	rc = ioctl(m_fb0Fd, FBIOPAN_DISPLAY, &screeninfo);
-	Q_ASSERT_X(rc >= 0, __PRETTY_FUNCTION__, "ioctl(FBIOPAN_DISPLAY) failed");
 }
 
 QImage HostArm::takeScreenShot() const
 {
-	if (m_fb0Fd < 0 || m_fb0Buffer == 0)
-		return QImage();
-
-	int yoffset = 0;
-
-	struct fb_var_screeninfo screeninfo;
-	int rc = ::ioctl(m_fb0Fd, FBIOGET_VSCREENINFO, &screeninfo);
-	if (rc >= 0)
-		yoffset = screeninfo.yoffset;
-
-	yoffset = qMax(yoffset, 0);
-	yoffset = qMin(yoffset, m_info.displayHeight * (m_fb0NumBuffers - 1));
-
-	QImage image((const unsigned char*) m_fb0Buffer +
-				 m_info.displayWidth * yoffset * 4,
-				 m_info.displayWidth, m_info.displayHeight,
-				 QImage::Format_ARGB32_Premultiplied);
-
+	QImage image;
 	return image;
 }
 
 QImage HostArm::takeAppDirectRenderingScreenShot() const
 {
-	if (m_fb1Fd < 0 || m_fb1Buffer == 0)
-		return QImage();
-
-	int yoffset = 0;
-
-	struct fb_var_screeninfo screeninfo;
-	int rc = ::ioctl(m_fb1Fd, FBIOGET_VSCREENINFO, &screeninfo);
-	if (rc >= 0)
-		yoffset = screeninfo.yoffset;
-
-	yoffset = qMax(yoffset, 0);
-	yoffset = qMin(yoffset, m_info.displayHeight * (m_fb1NumBuffers - 1));
-
-	QImage image((const unsigned char*) m_fb1Buffer +
-				 m_info.displayWidth * yoffset * 4,
-				 m_info.displayWidth, m_info.displayHeight,
-				 QImage::Format_ARGB32_Premultiplied);
-	
-	return image;    
+	QImage image;
+	return image;
 }
 
 void HostArm::setAppDirectRenderingLayerEnabled(bool enable)
 {
-#if !defined(FB1_POWER_OPTIMIZATION)
 	return;
-#endif	
-	
-	if (m_fb1Fd < 0)
-		return;
-
-	g_message("%s fb1", enable ? "Unblanking" : "Blanking");
-	
-	(void) ::ioctl(m_fb1Fd, FBIOBLANK, enable ? FB_BLANK_UNBLANK : FB_BLANK_POWERDOWN);
 }
 
 void HostArm::setRenderingLayerEnabled(bool enable)
 {
-#if !defined(FB1_POWER_OPTIMIZATION)
 	return;
-#endif	
-
-	if (m_fb0Fd < 0)
-		return;
-
-	g_message("%s fb0", enable ? "Unblanking" : "Blanking");
-
-	(void) ::ioctl(m_fb0Fd, FBIOBLANK, enable ? FB_BLANK_UNBLANK : FB_BLANK_POWERDOWN);	
 }
 
 void HostArm::wakeUpLcd()
 {
-	(void) ::system("echo 1 > /sys/class/display/lcd.0/state");
 }
 
 void HostArm::OrientationSensorOn(bool enable)

@@ -275,13 +275,6 @@ protected:
 	HidHardwareRevision_t m_hwRev;
 	HidHardwarePlatform_t m_hwPlatform;
 #endif
-	int m_fb0Fd;
-	int m_fb1Fd;
-	void* m_fb0Buffer;
-	int m_fb0NumBuffers;
-	void* m_fb1Buffer;
-	int m_fb1NumBuffers;
-
 	LSHandle* m_service;
 
 	InputControl* m_nyxInputControlALS;
