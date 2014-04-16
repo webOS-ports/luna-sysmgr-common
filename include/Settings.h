@@ -232,6 +232,7 @@ public:
 	qreal layoutScale;
 	qreal layoutScaleCompat;
 	qreal pixmapScale;
+	qreal gridUnit;
 	int  homeButtonOrientationAngle;
 
 	int positiveSpaceTopPadding;

@@ -229,6 +229,7 @@ Settings::Settings()
 	, layoutScale(1.0)
 	, layoutScaleCompat(1.0)
 	, pixmapScale(0.25)
+	, gridUnit(8)
 	, homeButtonOrientationAngle(0)
 	, positiveSpaceTopPadding(24)
 	, positiveSpaceBottomPadding(24)
@@ -538,6 +539,7 @@ void Settings::load(const char* settingsFile)
 	KEY_INTEGER("UI", "DPI", dpi);
 	KEY_INTEGER("UI", "CompatDPI", compatDpi);
 	KEY_DOUBLE("UI", "PixmapFactor", pixmapFactor);
+	KEY_DOUBLE("UI", "GridUnit", gridUnit);
 	KEY_INTEGER("UI", "HomeButtonOrientationAngle", homeButtonOrientationAngle);
 	KEY_INTEGER("UI", "PositiveSpaceTopPadding", positiveSpaceTopPadding);
 	KEY_INTEGER("UI", "PositiveSpaceBottomPadding", positiveSpaceBottomPadding);
