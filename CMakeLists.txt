@@ -67,6 +67,7 @@ set(SOURCES
     Src/base/settings/LocalePreferences.cpp
     Src/base/settings/AnimationSettings.cpp
     Src/base/settings/Preferences.cpp
+    Src/base/settings/DeviceInfo.cpp
     Src/base/hosts/HostBase.cpp
     Src/base/hosts/HostArm.cpp
     Src/base/hosts/HostUnknown.h
@@ -83,6 +84,7 @@ set(SOURCES
     Src/core/KeywordMap.cpp
     Src/core/Mutex.cpp
     Src/core/AsyncCaller.cpp
+    Src/core/MallocHooks.cpp
     Src/nyx/NyxLedControl.cpp
     Src/nyx/NyxInputControl.cpp
     Src/nyx/NyxSensorConnector.cpp
