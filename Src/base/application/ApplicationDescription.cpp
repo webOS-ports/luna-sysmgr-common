@@ -19,7 +19,7 @@
 
 #include "Common.h"
 
-#include <cjson/json.h>
+#include <json.h>
 
 #include "ApplicationDescription.h"
 

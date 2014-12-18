@@ -48,7 +48,7 @@
 #include <QGraphicsView>
 #endif // USE_MOUSE_FILTER
 
-#include <cjson/json.h>
+#include <json.h>
 
 #include "CustomEvents.h"
 #include "Time.h"

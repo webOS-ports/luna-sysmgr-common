@@ -25,7 +25,7 @@
 #include <QWidget>
 #include <QMap>
 
-#include <cjson/json.h>
+#include <json.h>
 #include <glib.h>
 
 #define CHECK_ERROR(err, msg)                                                                               \

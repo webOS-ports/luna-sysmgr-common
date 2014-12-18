@@ -40,7 +40,7 @@ pkg_check_modules(NYX nyx REQUIRED)
 pkg_check_modules(PBNJSON_CPP pbnjson_cpp REQUIRED)
 pkg_check_modules(SQLITE3 sqlite3 REQUIRED)
 pkg_check_modules(PMLOGLIB PmLogLib REQUIRED)
-pkg_check_modules(CJSON cjson REQUIRED)
+pkg_check_modules(JSON json-c REQUIRED)
 
 include_directories(
     ${GLIB2_INCLUDE_DIRS}
@@ -53,7 +53,7 @@ include_directories(
     ${PBNJSON_CPP_INCLUDE_DIRS}
     ${SQLITE3_INCLUDE_DIRS}
     ${PMLOGLIB_INCLUDE_DIRS}
-    ${CJSON_INCLUDE_DIRS}
+    ${JSON_INCLUDE_DIRS}
     ${CMAKE_SOURCE_DIR}/Src/base
     ${CMAKE_SOURCE_DIR}/Src/base/application
     ${CMAKE_SOURCE_DIR}/Src/base/hosts
@@ -105,7 +105,7 @@ target_link_libraries(LunaSysMgrCommon
     ${PBNJSON_CPP_LIBRARIES}
     ${SQLITE3_LIBRARIES}
     ${PMLOGLIB_LIBRARIES}
-    ${CJSON_LIBRARIES}
+    ${JSON_LIBRARIES}
     pthread)
 qt5_use_modules(LunaSysMgrCommon Core Gui Widgets)
 

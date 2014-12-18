@@ -27,7 +27,7 @@
 #include "Settings.h"
 
 #include <sqlite3.h>
-#include <cjson/json.h>
+#include <json.h>
 
 #include "HostBase.h"
 #include "Logging.h"

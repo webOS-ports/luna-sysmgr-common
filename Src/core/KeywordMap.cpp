@@ -24,7 +24,7 @@
 #include <string.h>
 #include "KeywordMap.h"
 
-#include "cjson/json.h"
+#include <json.h>
 
 /// ------------------------------------ public: -----------------------------------------------------------------------
 
