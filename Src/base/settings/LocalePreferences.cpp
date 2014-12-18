@@ -25,7 +25,7 @@
 #include "Settings.h"
 
 #include <sqlite3.h>
-#include <cjson/json.h>
+#include <json.h>
 
 #include "HostBase.h"
 #include "Logging.h"
@@ -591,8 +591,10 @@ bool LocalePreferences::getLocaleInfoCallback(LSHandle *sh,
         goto Done;
     }
 
-    json_object_object_foreach(localesObj, keyName, valueName) {
-        newLocales.insert(keyName, json_object_get_string(valueName));
+    {
+        json_object_object_foreach(localesObj, keyName, valueName) {
+            newLocales.insert(keyName, json_object_get_string(valueName));
+        }
     }
 
     lp->m_mutex.lock();
