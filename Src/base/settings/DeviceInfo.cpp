@@ -32,7 +32,7 @@
 #include <lunaprefs.h>
 #endif
 
-#include <json.h>
+#include <json-c/json.h>
 
 static DeviceInfo* s_instance = 0;
 static const int kTouchableHeight = 48;

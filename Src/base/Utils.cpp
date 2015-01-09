@@ -31,8 +31,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <glib.h>
-#include <json.h>
-#include <json/json_util.h>
+#include <json-c/json.h>
+#include <json-c/json_util.h>
 #include <algorithm>
 #include <fcntl.h>
 

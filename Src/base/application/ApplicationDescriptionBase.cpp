@@ -16,7 +16,7 @@
 *
 * LICENSE@@@ */
 
-#include <json.h>
+#include <json-c/json.h>
 #include <stdio.h>
 
 #include "Common.h"
