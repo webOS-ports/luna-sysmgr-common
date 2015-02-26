@@ -70,28 +70,28 @@ LocalePreferences::~LocalePreferences()
 {
 }
 
-std::string LocalePreferences::locale() const
+QString LocalePreferences::locale() const
 {
     MutexLocker locker(&m_mutex);
-    return m_locale;
+    return QString::fromStdString(m_locale);
 }
 
-std::string LocalePreferences::localeRegion() const
+QString LocalePreferences::localeRegion() const
 {
     MutexLocker locker(&m_mutex);
-    return m_localeRegion;
+    return QString::fromStdString(m_localeRegion);
 }
 
-std::string LocalePreferences::phoneRegion() const
+QString LocalePreferences::phoneRegion() const
 {
     MutexLocker locker(&m_mutex);
-    return m_phoneRegion;
+    return QString::fromStdString(m_phoneRegion);
 }
 
-std::string LocalePreferences::timeFormat() const
+QString LocalePreferences::timeFormat() const
 {
     MutexLocker locker(&m_mutex);
-    return m_currentTimeFormat;
+    return QString::fromStdString(m_currentTimeFormat);
 }
 
 QString LocalePreferences::uiLocale() const
@@ -279,6 +279,7 @@ void LocalePreferences::init()
         }
 
         m_locales.timezone = QString(json_object_get_string(label));
+        Q_EMIT timezoneChanged();
 
         label = json_object_object_get(json, kLocaleInfo_Clock);
 
@@ -287,6 +288,7 @@ void LocalePreferences::init()
         }
 
         m_locales.clock = QString(json_object_get_string(label));
+        Q_EMIT clockChanged();
 
         json_object_put(json);
         json = 0;
@@ -622,6 +624,7 @@ bool LocalePreferences::getLocaleInfoCallback(LSHandle *sh,
 
     if (!newValue.isEmpty() && newValue != lp->m_locales.timezone) {
         lp->m_locales.timezone = newValue;
+        Q_EMIT lp->timezoneChanged();
         changed = true;
     }
 
@@ -637,6 +640,7 @@ bool LocalePreferences::getLocaleInfoCallback(LSHandle *sh,
 
     if (!newValue.isEmpty() && newValue != lp->m_locales.clock) {
         lp->m_locales.clock = newValue;
+        Q_EMIT lp->clockChanged();
         changed = true;
     }
 

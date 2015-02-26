@@ -60,7 +60,7 @@ void Localization::loadLocalizedStrings()
 
 	QVector<std::string> translations;
 
-    std::string locale = LocalePreferences::instance()->locale();
+    std::string locale = LocalePreferences::instance()->locale().toStdString();
 	translations << Settings::LunaSettings()->lunaCustomizationLocalePath + "/" + locale + s_localeFile;
 	translations << Settings::LunaSettings()->lunaSystemLocalePath + "/" + locale + s_localeFile;
 

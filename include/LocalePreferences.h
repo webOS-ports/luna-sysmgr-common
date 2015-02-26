@@ -34,6 +34,13 @@
 class LocalePreferences : public QObject
 {
     Q_OBJECT
+    Q_PROPERTY(QString uiLocale READ uiLocale NOTIFY prefsLocaleChanged)
+    Q_PROPERTY(QString timezone READ timezone NOTIFY timezoneChanged)
+    Q_PROPERTY(QString clock READ clock NOTIFY clockChanged)
+    Q_PROPERTY(QString locale READ locale NOTIFY prefsLocaleChanged)
+    Q_PROPERTY(QString localeRegion READ localeRegion NOTIFY prefsLocaleChanged)
+    Q_PROPERTY(QString phoneRegion READ phoneRegion NOTIFY prefsLocaleChanged)
+    Q_PROPERTY(QString timeFormat READ timeFormat NOTIFY prefsLocaleChanged)
 
 public:
     struct LocaleInfo {
@@ -59,15 +66,17 @@ public:
     //! Get all locale information
     LocaleInfo locales() const;
 
-    std::string locale() const;
-    std::string localeRegion() const;
-    std::string phoneRegion() const;
-    std::string timeFormat() const;
+    QString locale() const;
+    QString localeRegion() const;
+    QString phoneRegion() const;
+    QString timeFormat() const;
 
 Q_SIGNALS:
     void prefsLocaleChanged(void);
     void signalTimeFormatChanged(const char* format);
     void localeInfoChanged();
+    void timezoneChanged();
+    void clockChanged();
 
 private:
 
