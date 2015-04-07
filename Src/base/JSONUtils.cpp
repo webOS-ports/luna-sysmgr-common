@@ -105,7 +105,7 @@ std::string LSMessageJsonParser::getSender()
 
     if (mMessage) {
         const char * sender = LSMessageGetSenderServiceName(mMessage);
-        if (sender || *sender)
+        if (sender && *sender)
             strSender = std::string(LSMessageGetSender(mMessage));
     }
 
