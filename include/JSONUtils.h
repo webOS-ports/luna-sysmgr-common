@@ -212,8 +212,16 @@ private:
 /**
   * Main Validation Code
   */
+
+// pbnjson uses v4 json schema while luna-sysmgr the v2 one
+// this converts optional keywords in v2 to required array in v4
+jvalue_ref convert_schema_v2_to_v4(const char *schema_v2);
+
 #define VALIDATE_SCHEMA_AND_RETURN_OPTION(lsHandle, message, schema, schErrOption) {\
-                                                                                        LSMessageJsonParser jsonParser(message, schema);                                                        \
+                                                                                        jvalue_ref schema_v4 = convert_schema_v2_to_v4(schema);                                                 \
+                                                                                        LSMessageJsonParser jsonParser(message, jvalue_tostring_simple(schema_v4));                             \
+                                                                                        if (!jis_null(schema_v4))                                                                               \
+                                                                                            j_release(&schema_v4);                                                                              \
                                                                                                                                                                                                 \
                                                                                         if (EDefault == schErrOption)                                                                           \
                                                                                             schErrOption = static_cast<ESchemaErrorOptions>(Settings::LunaSettings()->schemaValidationOption);  \
