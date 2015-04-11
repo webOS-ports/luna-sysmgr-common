@@ -77,6 +77,7 @@ set(SOURCES
     Src/base/Localization.cpp
     Src/base/Logging.cpp
     Src/base/application/ApplicationDescriptionBase.cpp
+    Src/base/CoreNaviLeds.cpp
     Src/core/SyncTask.cpp
     Src/core/Timer.cpp
     Src/core/SingletonTimer.cpp
