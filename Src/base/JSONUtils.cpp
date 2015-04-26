@@ -92,8 +92,8 @@ std::string LSMessageJsonParser::getMsgCategoryMethod()
     std::string context = "";
 
     if (mMessage) {
-        context = "Category: " + std::string(LSMessageGetCategory(mMessage)) + " ";
-        context += "Method: " + std::string(LSMessageGetMethod(mMessage));
+        context = "Category: " + std::string(LSMessageGetCategory(mMessage)?:"") + " ";
+        context += "Method: " + std::string(LSMessageGetMethod(mMessage)?:"");
     }
 
     return context;
@@ -106,7 +106,7 @@ std::string LSMessageJsonParser::getSender()
     if (mMessage) {
         const char * sender = LSMessageGetSenderServiceName(mMessage);
         if (sender && *sender)
-            strSender = std::string(LSMessageGetSender(mMessage));
+            strSender = std::string(LSMessageGetSender(mMessage)?:"");
     }
 
     return strSender;
