@@ -28,6 +28,7 @@ struct json_object;
 
 class ApplicationDescriptionBase: public QObject
 {
+    Q_OBJECT
 public:
     enum Type {
         Type_Web = 0,
