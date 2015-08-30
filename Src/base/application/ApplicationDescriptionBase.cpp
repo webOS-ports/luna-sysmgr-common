@@ -25,6 +25,7 @@
 
 ApplicationDescriptionBase::ApplicationDescriptionBase()
 {
+    m_entryPoint = "index.html";
     m_headLess = false;
     m_requestedWindowOrientation = "";
     m_flickable = false;
@@ -55,18 +56,22 @@ bool ApplicationDescriptionBase::fromJsonObject(const struct json_object* root)
     bool success = true;
 
     success &= extractFromJson(root, "id", m_id);
-    success &= extractFromJson(root, "main", m_entryPoint);
-    success &= extractFromJson(root, "noWindow", m_headLess);
-    success &= extractFromJson(root, "requestedWindowOrientation", m_requestedWindowOrientation);
     success &= extractFromJson(root, "title", m_title);
-    success &= extractFromJson(root, "icon", m_icon);
-    success &= extractFromJson(root, "flickable", m_flickable);
-    success &= extractFromJson(root, "internetConnectivityRequired", m_internetConnectivityRequired);
-    success &= extractFromJson(root, "urlsAllowed", m_urlsAllowed);
-    success &= extractFromJson(root, "plugin", m_pluginName);
-    success &= extractFromJson(root, "userAgent", m_userAgent);
-    success &= extractFromJson(root, "loadingAnimationDisabled", m_loadingAnimationDisabled);
-    success &= extractFromJson(root, "allowCrossDomainAccess", m_allowCrossDomainAccess);
+
+    // there is a possible fallback if there is no icon
+    extractFromJson(root, "icon", m_icon);
+
+    // the following properties are facultative, and shouldn't result in a failure
+    extractFromJson(root, "noWindow", m_headLess);
+    extractFromJson(root, "requestedWindowOrientation", m_requestedWindowOrientation);
+    extractFromJson(root, "main", m_entryPoint);
+    extractFromJson(root, "flickable", m_flickable);
+    extractFromJson(root, "internetConnectivityRequired", m_internetConnectivityRequired);
+    extractFromJson(root, "urlsAllowed", m_urlsAllowed);
+    extractFromJson(root, "plugin", m_pluginName);
+    extractFromJson(root, "userAgent", m_userAgent);
+    extractFromJson(root, "loadingAnimationDisabled", m_loadingAnimationDisabled);
+    extractFromJson(root, "allowCrossDomainAccess", m_allowCrossDomainAccess);
 
     if(!success)
         fprintf(stderr,"ApplicationDescriptionBase::fromJsonString : error decodeing app description JSON string.\n" );
