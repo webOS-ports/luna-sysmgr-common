@@ -518,6 +518,29 @@ bool extractFromJson(struct json_object * root,const std::string& key,bool& r_va
 	return true;
 }
 
+bool extractFromJson(struct json_object * root,const std::string& key,std::list<std::string>& r_value)
+{
+	if ((!root) || (is_error(root)) || (key.length() == 0))
+		return false;
+
+	struct json_object* label = 0;
+
+	label = json_object_object_get(root,key.c_str());
+	if ((!label) || (is_error(label))) {
+		return false;
+	}
+
+	int arrayLength = json_object_array_length(label);
+	for (int i=0;i<arrayLength; ++i) {
+		struct json_object* label_i = json_object_array_get_idx(label,i);
+		if ((!label_i) || (is_error(label_i))) {
+			return false;
+		}
+		r_value.push_back(json_object_get_string(label_i));
+	}
+	return true;
+}
+
 
 struct json_object * JsonGetObject(struct json_object * root,const std::string& key)
 {
