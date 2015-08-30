@@ -20,12 +20,15 @@
 #define APPLICATIONDESCRIPTIONBASE_H
 
 #include <string>
+#include <QObject>
+
 #include "Common.h"
 
 struct json_object;
 
-class ApplicationDescriptionBase
+class ApplicationDescriptionBase: public QObject
 {
+    Q_OBJECT
 public:
     enum Type {
         Type_Web = 0,
