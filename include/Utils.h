@@ -74,6 +74,7 @@ bool extractFromJson(const std::string& jsonString,const std::string& key,std::s
 bool extractFromJson(struct json_object * root,const std::string& key,std::string& r_value);
 bool extractFromJson(struct json_object * root,const std::string& key,int& r_value);
 bool extractFromJson(struct json_object * root,const std::string& key,bool& r_value);
+bool extractFromJson(struct json_object * root,const std::string& key,std::list<std::string>& r_value);
 struct json_object * JsonGetObject(struct json_object * root,const std::string& key);
 
 std::string base64_encode(unsigned char const* , unsigned int len);

@@ -89,6 +89,7 @@ set(SOURCES
     Src/nyx/NyxLedControl.cpp
     Src/nyx/NyxInputControl.cpp
     Src/nyx/NyxSensorConnector.cpp
+    include/ApplicationDescriptionBase.h
     include/ProcessKiller.h
     include/LocalePreferences.h
     include/HostBase.h
