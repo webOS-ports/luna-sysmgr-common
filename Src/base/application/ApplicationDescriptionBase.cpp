@@ -105,15 +105,15 @@ json_object* ApplicationDescriptionBase::getAppDescription() const
     json_object_object_add(json, (char*) "requestedWindowOrientation", json_object_new_string((char*) m_requestedWindowOrientation.c_str()));
     json_object_object_add(json, (char*) "title", json_object_new_string((char *) m_title.c_str()));
     json_object_object_add(json, (char*) "icon", json_object_new_string((char *) m_icon.c_str()));
-    json_object_object_add(json, (char*) "flickable", json_object_new_string((char *) m_flickable));
-    json_object_object_add(json, (char*) "internetConnectivityRequired", json_object_new_string((char *) m_internetConnectivityRequired));
+    json_object_object_add(json, (char*) "flickable", json_object_new_boolean(m_flickable));
+    json_object_object_add(json, (char*) "internetConnectivityRequired", json_object_new_boolean(m_internetConnectivityRequired));
     if( json_object_array_length(json_urlAllowed)>0 ) {
         json_object_object_add(json, (char*) "urlsAllowed", json_urlAllowed);
     }
     json_object_object_add(json, (char*) "plugin", json_object_new_string((char *) m_pluginName.c_str()));
     json_object_object_add(json, (char*) "userAgent", json_object_new_string((char *) m_userAgent.c_str()));
-    json_object_object_add(json, (char*) "loadingAnimationDisabled", json_object_new_string((char *) m_loadingAnimationDisabled));
-    json_object_object_add(json, (char*) "allowCrossDomainAccess", json_object_new_string((char *) m_allowCrossDomainAccess));
+    json_object_object_add(json, (char*) "loadingAnimationDisabled", json_object_new_boolean(m_loadingAnimationDisabled));
+    json_object_object_add(json, (char*) "allowCrossDomainAccess", json_object_new_boolean(m_allowCrossDomainAccess));
 
     return json;
 }
