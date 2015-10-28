@@ -272,10 +272,10 @@ Settings::Settings()
     , allowAllAppsInLowMemory(false)
 	, hardwareName("unknown")
 	, hardwareType(HardwareTypeDesktop)
-	, hasVolumeButton
-	, hasPowerButton
-	, hasHomeButton
-	, hasBrightnessControl
+	, hasVolumeButton(true)
+	, hasPowerButton(true)
+	, hasHomeButton(false)
+	, hasBrightnessControl(true)
 {
 	allSettings = new QHash<QString, QVariant>();
 
