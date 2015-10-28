@@ -272,6 +272,10 @@ Settings::Settings()
     , allowAllAppsInLowMemory(false)
 	, hardwareName("unknown")
 	, hardwareType(HardwareTypeDesktop)
+	, hasVolumeButton(true)
+	, hasPowerButton(true)
+	, hasHomeButton(false)
+	, hasBrightnessControl(true)
 {
 	allSettings = new QHash<QString, QVariant>();
 
@@ -612,6 +616,11 @@ void Settings::load(const char* settingsFile)
 		hardwareType = HardwareTypeDesktop;
 	else if (type == "device")
 		hardwareType = HardwareTypeDevice;
+	
+	KEY_BOOLEAN("Hardware", "HasVolumeButton", hasVolumeButton);
+	KEY_BOOLEAN("Hardware", "HasPowerButton", hasPowerButton);
+	KEY_BOOLEAN("Hardware", "HasHomeButton", hasHomeButton);
+	KEY_BOOLEAN("Hardware", "HasBrightnessControl", hasBrightnessControl);
 
 	gchar** compatAppsStr = g_key_file_get_string_list(keyfile, "UI", "CompatApps", NULL, NULL);
 	if (compatAppsStr) {
