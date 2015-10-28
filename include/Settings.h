@@ -298,10 +298,10 @@ public:
 	HardwareType hardwareType;
 	
 	//Hardware features/buttons
-	bool hasVolumeButton
-	bool hasPowerButton
-	bool hasHomeButton
-	bool hasBrightnessControl
+	bool hasVolumeButton;
+	bool hasPowerButton;
+	bool hasHomeButton;
+	bool hasBrightnessControl;
 
 	static inline Settings*  LunaSettings() {
 		if (G_LIKELY(s_settings))
