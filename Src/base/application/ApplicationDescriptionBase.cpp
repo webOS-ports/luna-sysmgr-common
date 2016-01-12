@@ -38,7 +38,7 @@ ApplicationDescriptionBase::ApplicationDescriptionBase(const ApplicationDescript
     m_id(other.id()),
     m_title(other.title()),
     m_icon(other.icon()),
-    m_miniIconName(other.miniicon()),
+    m_miniIconName(other.miniIconUrl()),
     m_entryPoint(other.entryPoint()),
     m_headLess(other.isHeadLess()),
     m_pluginName(other.pluginName()),
