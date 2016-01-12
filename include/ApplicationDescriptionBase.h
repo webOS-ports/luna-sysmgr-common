@@ -68,7 +68,7 @@ protected:
     std::string             m_id;
     std::string             m_title;    //copy of default launchpoint's title
     std::string             m_icon;
-	std::string             m_miniIconName;    
+    std::string             m_miniIconName;    
     std::string             m_entryPoint;
     bool                    m_headLess;
     std::string             m_requestedWindowOrientation;
