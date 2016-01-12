@@ -38,6 +38,7 @@ ApplicationDescriptionBase::ApplicationDescriptionBase(const ApplicationDescript
     m_id(other.id()),
     m_title(other.title()),
     m_icon(other.icon()),
+    m_miniIconName(other.miniicon()),
     m_entryPoint(other.entryPoint()),
     m_headLess(other.isHeadLess()),
     m_pluginName(other.pluginName()),
@@ -62,6 +63,7 @@ bool ApplicationDescriptionBase::fromJsonObject(const struct json_object* root)
     extractFromJson(root, "icon", m_icon);
 
     // the following properties are facultative, and shouldn't result in a failure
+    extractFromJson(root, "miniicon", m_miniIconName);
     extractFromJson(root, "noWindow", m_headLess);
     extractFromJson(root, "requestedWindowOrientation", m_requestedWindowOrientation);
     extractFromJson(root, "main", m_entryPoint);
@@ -105,6 +107,7 @@ json_object* ApplicationDescriptionBase::getAppDescription() const
     json_object_object_add(json, (char*) "requestedWindowOrientation", json_object_new_string((char*) m_requestedWindowOrientation.c_str()));
     json_object_object_add(json, (char*) "title", json_object_new_string((char *) m_title.c_str()));
     json_object_object_add(json, (char*) "icon", json_object_new_string((char *) m_icon.c_str()));
+    json_object_object_add(json, (char*) "miniicon", json_object_new_string((char *) m_miniIconName.c_str()));
     json_object_object_add(json, (char*) "flickable", json_object_new_boolean(m_flickable));
     json_object_object_add(json, (char*) "internetConnectivityRequired", json_object_new_boolean(m_internetConnectivityRequired));
     if( json_object_array_length(json_urlAllowed)>0 ) {
