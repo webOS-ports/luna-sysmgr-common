@@ -39,7 +39,7 @@ public:
 	bool coreNaviButton() const;
 	bool wifiAvailable() const { return m_wifiAvailable; }
 	bool bluetoothAvailable() const { return m_bluetoothAvailable; }
-	bool carrierAvailable() const {return (m_radioType != 0);}
+	bool carrierAvailable() const {return true;} //FIXME, only need to return in case we have a radio (m_radioType != 0)
 	bool compassAvailable() const { return false; } // FIXME
 	bool accelerometerAvailable() const { return true; } // FIXME
 	bool dockModeEnabled() const { return true; }

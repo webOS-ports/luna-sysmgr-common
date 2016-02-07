@@ -162,6 +162,8 @@ void DeviceInfo::gatherInfo()
 
 
 	// RadioType and carrier availability -----------------------------------------
+/*
+//We don't use /dev/tokens/RadioType anymore, so disabling it for now
     gchar* buffer;
     gsize sz;
     int token = 0;
@@ -175,7 +177,7 @@ void DeviceInfo::gatherInfo()
         g_free(buffer);
         m_radioType = token;
     }
-
+*/
 /*	
 	// Storage --------------------------------------------------------------------
 
