@@ -125,15 +125,15 @@ Settings::Settings()
 	, lightbarEnabled (false)
 	, coreNaviScaler (75)
 	, gestureAnimationSpeed (1000)
-        , backlightOutdoorScale (250)
-        , backlightDimScale (30)
-        , backlightDarkScale (10)
+	, backlightOutdoorScale (250)
+	, backlightDimScale (30)
+	, backlightDarkScale (10)
 	, displayWidth(320)
 	, displayHeight(320)
-        , tileWidth(512)
-        , tileHeight(512)
-        , nonPowerOfTwoUpdateAtlas(false)
-        , numberOfUpdateAtlases(5)
+	, tileWidth(512)
+	, tileHeight(512)
+	, nonPowerOfTwoUpdateAtlas(false)
+	, numberOfUpdateAtlases(5)
 	, gestureAreaHeight(50)
 	, displayNumBuffers(3)
 	, ledPulseMaxBrightness (100)
@@ -184,7 +184,7 @@ Settings::Settings()
 	, quicklaunchCustomPositions("/usr/lib/luna/customization/default-dock-positions.json")
 	, quicklaunchUserPositions("/var/palm/user-dock-positions.json")
 	, launcherScrim("/usr/lib/luna/system/luna-applauncher/images/launcher_scrim.png")
-        , firstCardLaunch("/var/luna/preferences/used-first-card")
+	, firstCardLaunch("/var/luna/preferences/used-first-card")
 	, atlasEnabled(false)
 	, cardGroupingXDistanceFactor(1.0)
 	, atlasMemThreshold(0)
@@ -412,77 +412,77 @@ void Settings::load(const char* settingsFile)
 		downloadPathMedia = "/media/internal/downloads";
 	}
 
-	KEY_STRING("General","AppInstallTemp",appInstallerTmp);
+	KEY_STRING("General", "AppInstallTemp",appInstallerTmp);
 
-	KEY_STRING("General","SystemPath", lunaSystemPath );
-	KEY_STRING("General","AppLauncherPath", lunaAppLauncherPath );
-	KEY_STRING("General","SystemResourcesPath", lunaSystemResourcesPath );
-	KEY_STRING("General","SystemLocalePath", lunaSystemLocalePath );
-	KEY_STRING("General","PresetLaunchPointsPath",lunaPresetLaunchPointsPath);
-	KEY_STRING("General","LaunchPointsPath", lunaLaunchPointsPath);
+	KEY_STRING("General", "SystemPath", lunaSystemPath );
+	KEY_STRING("General", "AppLauncherPath", lunaAppLauncherPath );
+	KEY_STRING("General", "SystemResourcesPath", lunaSystemResourcesPath );
+	KEY_STRING("General", "SystemLocalePath", lunaSystemLocalePath );
+	KEY_STRING("General", "PresetLaunchPointsPath",lunaPresetLaunchPointsPath);
+	KEY_STRING("General", "LaunchPointsPath", lunaLaunchPointsPath);
 	KEY_STRING("General", "PreferencesPath", lunaPrefsPath);
-	KEY_STRING("General","UiComponentsPath", lunaQmlUiComponentsPath );
-	KEY_STRING("General","ScreenCapturesPath", lunaScreenCapturesPath );
+	KEY_STRING("General", "UiComponentsPath", lunaQmlUiComponentsPath );
+	KEY_STRING("General", "ScreenCapturesPath", lunaScreenCapturesPath );
 
 	KEY_BOOLEAN("General", "ShowReticle", showReticle);
 
 	KEY_INTEGER("General", "NotificationSoundDuration", notificationSoundDuration);
 	KEY_BOOLEAN("General", "ShowNotificationsAtTop", showNotificationsAtTop);
 
-	KEY_INTEGER( "CoreNavi", "ThrobberBrightnessInLight", ledPulseMaxBrightness);
-	KEY_INTEGER( "CoreNavi", "ThrobberBrightnessInDark", ledPulseDarkBrightness);
-	KEY_BOOLEAN( "CoreNavi", "EnableLightBar", lightbarEnabled);
-	KEY_INTEGER( "CoreNavi", "CoreNaviBrightnessScaler", coreNaviScaler);
-	KEY_INTEGER( "CoreNavi", "GestureAnimationSpeedInMs", gestureAnimationSpeed);
-    KEY_INTEGER( "CoreNavi", "HomeDoubleClickDuration", homeDoubleClickDuration);
+	KEY_INTEGER("CoreNavi", "ThrobberBrightnessInLight", ledPulseMaxBrightness);
+	KEY_INTEGER("CoreNavi", "ThrobberBrightnessInDark", ledPulseDarkBrightness);
+	KEY_BOOLEAN("CoreNavi", "EnableLightBar", lightbarEnabled);
+	KEY_INTEGER("CoreNavi", "CoreNaviBrightnessScaler", coreNaviScaler);
+	KEY_INTEGER("CoreNavi", "GestureAnimationSpeedInMs", gestureAnimationSpeed);
+	KEY_INTEGER("CoreNavi", "HomeDoubleClickDuration", homeDoubleClickDuration);
 
-	KEY_INTEGER( "Display", "BrightnessOutdoorScale", backlightOutdoorScale);
-	KEY_INTEGER( "Display", "BrightnessDimScale", backlightDimScale);
-	KEY_INTEGER( "Display", "BrightnessDarkScale", backlightDarkScale);
+	KEY_INTEGER("Display", "BrightnessOutdoorScale", backlightOutdoorScale);
+	KEY_INTEGER("Display", "BrightnessDimScale", backlightDimScale);
+	KEY_INTEGER("Display", "BrightnessDarkScale", backlightDarkScale);
 
-	KEY_BOOLEAN( "Display", "EnableALS", enableAls);
-	KEY_BOOLEAN( "Display", "TurnOffAccelerometerWhenDimmed", turnOffAccelWhenDimmed);
-	KEY_BOOLEAN( "Display", "DisableLocking", disableLocking);
-	KEY_INTEGER( "Display", "LockScreenTimeoutMs", lockScreenTimeout);
+	KEY_BOOLEAN("Display", "EnableALS", enableAls);
+	KEY_BOOLEAN("Display", "TurnOffAccelerometerWhenDimmed", turnOffAccelWhenDimmed);
+	KEY_BOOLEAN("Display", "DisableLocking", disableLocking);
+	KEY_INTEGER("Display", "LockScreenTimeoutMs", lockScreenTimeout);
 
-	KEY_INTEGER( "Memory", "CardLimit", cardLimit );
-    KEY_BOOLEAN( "Memory", "AllowAllAppsInLowMemory", allowAllAppsInLowMemory);
-	KEY_INTEGER( "General","DisplayWidth",displayWidth);
-	KEY_INTEGER( "General","DisplayHeight",displayHeight);
+	KEY_INTEGER("Memory", "CardLimit", cardLimit );
+	KEY_BOOLEAN("Memory", "AllowAllAppsInLowMemory", allowAllAppsInLowMemory);
+	KEY_INTEGER("General", "DisplayWidth",displayWidth);
+	KEY_INTEGER("General", "DisplayHeight",displayHeight);
 	KEY_INTEGER("General", "TileWidth", tileWidth);
 	KEY_INTEGER("General", "TileHeight", tileHeight);
 	KEY_BOOLEAN("General", "NonPowerOfTwoUpdateAtlas", nonPowerOfTwoUpdateAtlas);
-	KEY_INTEGER( "General","GestureAreaHeight",gestureAreaHeight);
-	KEY_INTEGER( "General","DisplayNumBuffers", displayNumBuffers);
+	KEY_INTEGER("General", "GestureAreaHeight",gestureAreaHeight);
+	KEY_INTEGER("General", "DisplayNumBuffers", displayNumBuffers);
 	KEY_INTEGER("General", "MaxPenMoveFreq", maxPenMoveFreq);
 	KEY_INTEGER("General",  "MaxPaintLoad", maxPaintLoad);
 	KEY_INTEGER("General", "MaxGestureChangeFreq", maxGestureChangeFreq);
 	KEY_INTEGER("General", "MaxTouchChangeFreq", maxTouchChangeFreq);
-	KEY_BOOLEAN( "Debug", "WatchPenEvents", debug_trackInputEvents );
-	KEY_BOOLEAN( "Debug", "EnableDebugModeByDefault", debug_enabled );
-	KEY_BOOLEAN( "Debug", "PiranhaDrawColoredOutlines", debug_piranhaDrawColoredOutlines);
-	KEY_BOOLEAN( "Debug", "PiranhaDisplayFps", debug_piranhaDisplayFps);
-	KEY_BOOLEAN( "Debug", "ShowGestures", debug_showGestures);
+	KEY_BOOLEAN("Debug", "WatchPenEvents", debug_trackInputEvents );
+	KEY_BOOLEAN("Debug", "EnableDebugModeByDefault", debug_enabled );
+	KEY_BOOLEAN("Debug", "PiranhaDrawColoredOutlines", debug_piranhaDrawColoredOutlines);
+	KEY_BOOLEAN("Debug", "PiranhaDisplayFps", debug_piranhaDisplayFps);
+	KEY_BOOLEAN("Debug", "ShowGestures", debug_showGestures);
 
-	KEY_BOOLEAN( "Debug", "DoVerboseCrashLogging", debug_doVerboseCrashLogging);
-	KEY_BOOLEAN( "Debug", "LoopInCrashHandler", debug_loopInCrashHandler);
-	KEY_INTEGER( "Debug", "AppInstallerCleaner",debug_appInstallerCleaner );
-	KEY_STRING( "General", "CmdResourceHandlers", lunaCmdHandlerPath );
-	KEY_STRING( "General", "CmdResourceHandlersActiveCopy", lunaCmdHandlerSavedPath);
-	KEY_STRING( "Fonts", "Banner", fontBanner );
-	KEY_STRING( "Fonts", "ActiveBanner", fontActiveBanner );
-	KEY_STRING( "Fonts", "LockWindow", fontLockWindow );
-	KEY_STRING( "Fonts", "DockMode", fontDockMode );
-	KEY_STRING( "Fonts", "Quicklaunch", fontQuicklaunch );
-	KEY_STRING( "Fonts", "StatusBar", fontStatusBar );
-	KEY_STRING( "Fonts", "KeyboardKeys", fontKeyboardKeys );
-	KEY_STRING( "Fonts", "StatusBar", fontStatusBar );
+	KEY_BOOLEAN("Debug", "DoVerboseCrashLogging", debug_doVerboseCrashLogging);
+	KEY_BOOLEAN("Debug", "LoopInCrashHandler", debug_loopInCrashHandler);
+	KEY_INTEGER("Debug", "AppInstallerCleaner",debug_appInstallerCleaner );
+	KEY_STRING("General", "CmdResourceHandlers", lunaCmdHandlerPath );
+	KEY_STRING("General", "CmdResourceHandlersActiveCopy", lunaCmdHandlerSavedPath);
+	KEY_STRING("Fonts", "Banner", fontBanner );
+	KEY_STRING("Fonts", "ActiveBanner", fontActiveBanner );
+	KEY_STRING("Fonts", "LockWindow", fontLockWindow );
+	KEY_STRING("Fonts", "DockMode", fontDockMode );
+	KEY_STRING("Fonts", "Quicklaunch", fontQuicklaunch );
+	KEY_STRING("Fonts", "StatusBar", fontStatusBar );
+	KEY_STRING("Fonts", "KeyboardKeys", fontKeyboardKeys );
+	KEY_STRING("Fonts", "StatusBar", fontStatusBar );
 
 	KEY_INTEGER("TouchEvents", "TapRadiusMax", tapRadius);
 	KEY_INTEGER("TouchEvents", "TapRadiusMin", tapRadiusMin);
 	KEY_INTEGER("TouchEvents", "TapRadiusShrinkPerc", tapRadiusShrinkPercent);
 	KEY_INTEGER("TouchEvents", "TapRadiusShrinkGranMs", tapRadiusShrinkGranMs);
-    KEY_BOOLEAN("TouchEvents", "EnableForWebApps", enableTouchEventsForWebApps);
+	KEY_BOOLEAN("TouchEvents", "EnableForWebApps", enableTouchEventsForWebApps);
 
 	tapRadiusSquared = tapRadius * tapRadius;
 
@@ -512,24 +512,24 @@ void Settings::load(const char* settingsFile)
 	quicklaunchUserPositions = homeFolder + "/.user-dock-positions.json";
 #endif
 	KEY_STRING("General", "QuickLaunchUserPositions", quicklaunchUserPositions );
-	KEY_INTEGER( "General", "StatusBarTitleMaxWidth", statusBarTitleMaxWidth);
+	KEY_INTEGER("General", "StatusBarTitleMaxWidth", statusBarTitleMaxWidth);
 
-	KEY_BOOLEAN( "DockMode", "DockModePrelaunchAllApps", dockModePrelaunchAllApps);
-	KEY_BOOLEAN( "DockMode", "DockModeCloseAppOnMinimize", dockModeCloseOnMinimize);
-	KEY_BOOLEAN( "DockMode", "DockModeCloseAppsOnExit", dockModeCloseOnExit);
-	KEY_INTEGER( "DockMode", "DockModeMaxApps", dockModeMaxApps);
-	KEY_INTEGER( "DockMode", "DockModeNightBrightness", dockModeNightBrightness);
-	KEY_INTEGER( "DockMode", "DockModeMenuHeight", dockModeMenuHeight);
+	KEY_BOOLEAN("DockMode", "DockModePrelaunchAllApps", dockModePrelaunchAllApps);
+	KEY_BOOLEAN("DockMode", "DockModeCloseAppOnMinimize", dockModeCloseOnMinimize);
+	KEY_BOOLEAN("DockMode", "DockModeCloseAppsOnExit", dockModeCloseOnExit);
+	KEY_INTEGER("DockMode", "DockModeMaxApps", dockModeMaxApps);
+	KEY_INTEGER("DockMode", "DockModeNightBrightness", dockModeNightBrightness);
+	KEY_INTEGER("DockMode", "DockModeMenuHeight", dockModeMenuHeight);
 	KEY_STRING("DockMode", "DockModeDefaultPositions", quicklaunchDefaultPositions );
 #if defined(TARGET_DESKTOP)
 	dockModeUserPositions = homeFolder + "/.user-dock-mode-launcher-positions.json";
 #endif
 	KEY_STRING("DockMode", "DockModeUserPositions", quicklaunchUserPositions );
 
-	KEY_BOOLEAN( "VirtualKeyboard", "VirtualKeyboardEnabled", virtualKeyboardEnabled);
+	KEY_BOOLEAN("VirtualKeyboard", "VirtualKeyboardEnabled", virtualKeyboardEnabled);
 
-	KEY_BOOLEAN( "VirtualCoreNavi", "VirtualCoreNaviEnabled", virtualCoreNaviEnabled);
-	KEY_INTEGER( "VirtualCoreNavi", "VirtualCoreNaviHeight", virtualCoreNaviHeight);
+	KEY_BOOLEAN("VirtualCoreNavi", "VirtualCoreNaviEnabled", virtualCoreNaviEnabled);
+	KEY_INTEGER("VirtualCoreNavi", "VirtualCoreNaviHeight", virtualCoreNaviHeight);
 
 	KEY_DOUBLE("Launcher", "CardSideScrollSwipeThreshold", launcherSideSwipeThreshold);
 	KEY_BOOLEAN("Launcher", "UseOGLHardwareAntialias", launcherUsesHwAA);
@@ -562,7 +562,7 @@ void Settings::load(const char* settingsFile)
 	KEY_INTEGER("UI", "ModalWindowHeight", modalWindowHeight);
 
 	KEY_DOUBLE("UI", "CardGroupingXDistanceFactor", cardGroupingXDistanceFactor);
-    KEY_DOUBLE("UI", "CardDimmPercentage", cardDimmPercentage);
+	KEY_DOUBLE("UI", "CardDimmPercentage", cardDimmPercentage);
 
 	KEY_INTEGER("UI", "AtlasMemThreshold", atlasMemThreshold);
 	KEY_BOOLEAN("Debug", "LauncherAtlasStatistics", launcherAtlasStatistics);
@@ -579,14 +579,14 @@ void Settings::load(const char* settingsFile)
 	KEY_INTEGER("DownloadManager", "MaxConcurrent", maxDownloadManagerConcurrent);
 	KEY_INTEGER("DownloadManager", "MaxRecvSpeed", maxDownloadManagerRecvSpeed);
 
-	KEY_BOOLEAN( "Demo", "DemoMode", demoMode );
+	KEY_BOOLEAN("Demo", "DemoMode", demoMode );
 
-	KEY_BOOLEAN( "Debug", "ShowAppStats", showAppStats );
+	KEY_BOOLEAN("Debug", "ShowAppStats", showAppStats );
 
-	KEY_BOOLEAN( "General", "CollectUseStats", collectUseStats );
+	KEY_BOOLEAN("General", "CollectUseStats", collectUseStats );
 
-	KEY_BOOLEAN( "General" , "UsePartialKeywordMatchForAppSearch",usePartialKeywordAppSearch);
-	KEY_BOOLEAN( "General" , "ScanCalculatesAppSizes",scanCalculatesAppSizes);
+	KEY_BOOLEAN("General" , "UsePartialKeywordMatchForAppSearch",usePartialKeywordAppSearch);
+	KEY_BOOLEAN("General" , "ScanCalculatesAppSizes",scanCalculatesAppSizes);
 
 	KEY_INTEGER("KeepAlive", "MaxParked", maxNumParkedApps );
 
@@ -599,14 +599,14 @@ void Settings::load(const char* settingsFile)
 
 	KEY_BOOLEAN("AllowTurboMode", "General", allowTurboMode);
 
-	KEY_STRING( "General", "WifiInterfaceName", wifiInterfaceName );
-	KEY_STRING( "General", "WanInterfaceName", wanInterfaceName );
+	KEY_STRING("General", "WifiInterfaceName", wifiInterfaceName );
+	KEY_STRING("General", "WanInterfaceName", wanInterfaceName );
 
-	KEY_BOOLEAN( "Memory", "CanRestartHeadlessApps", canRestartHeadlessApps );
-	KEY_BOOLEAN( "Debug", "PerformanceLogs", perfTesting);
-	KEY_STRING( "General", "LogFileName", logFileName);
+	KEY_BOOLEAN("Memory", "CanRestartHeadlessApps", canRestartHeadlessApps );
+	KEY_BOOLEAN("Debug", "PerformanceLogs", perfTesting);
+	KEY_STRING("General", "LogFileName", logFileName);
 
-    KEY_INTEGER("General", "schemaValidationOption", schemaValidationOption);
+	KEY_INTEGER("General", "schemaValidationOption", schemaValidationOption);
 
 	std::string type = "desktop";
 	KEY_STRING("Hardware", "Type", type);
