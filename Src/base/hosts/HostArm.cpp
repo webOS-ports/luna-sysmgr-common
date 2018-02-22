@@ -432,7 +432,7 @@ bool HostArm::getMsgValueInt(LSMessage* msg, int& value)
 		return false;
 
 	json_object* json = json_tokener_parse(str);
-	if (!json || is_error(json))
+	if (!json)
 		return false;
 
 	const char* valueStr = json_object_get_string(json_object_object_get(json, "value"));

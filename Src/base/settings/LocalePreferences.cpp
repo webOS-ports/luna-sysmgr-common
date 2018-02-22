@@ -170,16 +170,16 @@ void LocalePreferences::init()
 
         label = 0;
         json = json_tokener_parse(val);
-        if (!json || is_error(json))
+        if (!json)
             goto Done;
 
         label = json_object_object_get(json, "languageCode");
-        if (!label || is_error(label))
+        if (!label)
             goto Done;
         languageCode = json_object_get_string(label);
 
         label = json_object_object_get(json, "countryCode");
-        if (!label || is_error(label))
+        if (!label)
             goto Done;
         countryCode = json_object_get_string(label);
 
@@ -189,10 +189,10 @@ void LocalePreferences::init()
 
         subobj = json_object_object_get(json, "phoneRegion");
 
-        if (subobj && !is_error(subobj)){
+        if (subobj){
             label = json_object_object_get(subobj, "countryCode");
 
-            if (label && !is_error(label)){
+            if (label){
                 m_phoneRegion = json_object_get_string(label);
             }
         }
@@ -220,11 +220,11 @@ void LocalePreferences::init()
 
         label = 0;
         json = json_tokener_parse(val);
-        if (!json || is_error(json))
+        if (!json)
             goto Done;
 
         label = json_object_object_get(json, "countryCode");
-        if (!label || is_error(label))
+        if (!label)
             goto Done;
         m_localeRegion = json_object_get_string(label);
 
@@ -258,13 +258,13 @@ void LocalePreferences::init()
         label = 0;
         json = json_tokener_parse(val);
 
-        if (!json || is_error(json)) {
+        if (!json) {
             goto Done;
         }
 
         label = json_object_object_get(json, kLocaleInfo_Locales);
 
-        if (!label || is_error(label)) {
+        if (!label) {
             goto Done;
         }
 
@@ -274,7 +274,7 @@ void LocalePreferences::init()
 
         label = json_object_object_get(json, kLocaleInfo_Timezone);
 
-        if (!label || is_error(label)) {
+        if (!label) {
             goto Done;
         }
 
@@ -283,7 +283,7 @@ void LocalePreferences::init()
 
         label = json_object_object_get(json, kLocaleInfo_Clock);
 
-        if (!label || is_error(label)) {
+        if (!label) {
             goto Done;
         }
 
@@ -308,7 +308,7 @@ Done:
     if (m_phoneRegion.empty())
         m_phoneRegion = m_localeRegion;
 
-    if (json && !is_error(json))
+    if (json)
         json_object_put(json);
 
     if (statement)
@@ -366,11 +366,11 @@ bool LocalePreferences::serverConnectCallback(LSHandle *sh, LSMessage *message, 
 
     label = 0;
     json = json_tokener_parse(payload);
-    if (!json || is_error(json))
+    if (!json)
         goto Done;
 
     label = json_object_object_get(json, "connected");
-    if (!label || is_error(label))
+    if (!label)
         goto Done;
     connected = json_object_get_boolean(label);
 
@@ -421,7 +421,7 @@ bool LocalePreferences::serverConnectCallback(LSHandle *sh, LSMessage *message, 
 
 Done:
 
-    if (json && !is_error(json))
+    if (json)
         json_object_put(json);
 
     return true;
@@ -454,29 +454,29 @@ bool LocalePreferences::getPreferencesCallback(LSHandle *sh, LSMessage *message,
     LocalePreferences * prefObjPtr = (LocalePreferences *)ctx;
     label = 0;
     json = json_tokener_parse(payload);
-    if (!json || is_error(json))
+    if (!json)
         goto Done;
 
     g_message("LocalePreferences::getPreferencesCallback(): toString -> [%s]\n", payload);
 
 
     value = json_object_object_get(json, "locale");
-    if ((value) && (!is_error(value))) {
+    if (value) {
 
         label = json_object_object_get(value, "languageCode");
-        if ((label) && (!is_error(label))) {
+        if (label) {
             languageCode = json_object_get_string(label);
         }
 
         label = json_object_object_get(value, "countryCode");
-        if ((label) && (!is_error(label))) {
+        if (label) {
             countryCode = json_object_get_string(label);
         }
 
         subobject = json_object_object_get(value, "phoneRegion");
-        if ((subobject) && (!is_error(subobject))) {
+        if (subobject) {
             label = json_object_object_get(subobject, "countryCode");
-            if ((label) && (!is_error(label))) {
+            if (label) {
                 newPhoneRegion = json_object_get_string(label);
             }
         }
@@ -510,10 +510,10 @@ bool LocalePreferences::getPreferencesCallback(LSHandle *sh, LSMessage *message,
     }
 
     value = json_object_object_get(json, "region");
-    if (value && !is_error(value)) {
+    if (value) {
 
         label = json_object_object_get(value, "countryCode");
-        if (label && !is_error(label))
+        if (label)
             newLocaleRegion = json_object_get_string(label);
 
         if (!newLocaleRegion.empty() && newLocaleRegion != prefObjPtr->m_localeRegion) {
@@ -535,7 +535,7 @@ bool LocalePreferences::getPreferencesCallback(LSHandle *sh, LSMessage *message,
         }
     }
     label = json_object_object_get(json, "timeFormat");
-    if (label && !is_error(label)) {
+    if (label) {
         if (prefObjPtr) {
             MutexLocker locker(&prefObjPtr->m_mutex);
             prefObjPtr->m_currentTimeFormat = json_object_get_string(label);
@@ -544,7 +544,7 @@ bool LocalePreferences::getPreferencesCallback(LSHandle *sh, LSMessage *message,
     }
 Done:
 
-    if (json && !is_error(json))
+    if (json)
         json_object_put(json);
 
     return true;
@@ -577,19 +577,19 @@ bool LocalePreferences::getLocaleInfoCallback(LSHandle *sh,
 
     rootObj = json_tokener_parse(payload);
 
-    if (!rootObj || is_error(rootObj)) {
+    if (!rootObj) {
         goto Done;
     }
 
     localeInfoObj = json_object_object_get(rootObj, kLocaleInfo_Root);
 
-    if (!localeInfoObj || is_error(localeInfoObj)) {
+    if (!localeInfoObj) {
         goto Done;
     }
 
     localesObj = json_object_object_get(localeInfoObj, kLocaleInfo_Locales);
 
-    if (!localesObj || is_error(localesObj)) {
+    if (!localesObj) {
         goto Done;
     }
 
@@ -615,7 +615,7 @@ bool LocalePreferences::getLocaleInfoCallback(LSHandle *sh,
 
     subObj = json_object_object_get(localeInfoObj, kLocaleInfo_Timezone);
 
-    if (!subObj || is_error(subObj)) {
+    if (!subObj) {
         goto Done;
     }
 
@@ -631,7 +631,7 @@ bool LocalePreferences::getLocaleInfoCallback(LSHandle *sh,
     lp->m_mutex.unlock();
     subObj = json_object_object_get(localeInfoObj, kLocaleInfo_Clock);
 
-    if (!subObj || is_error(subObj)) {
+    if (!subObj) {
         goto Done;
     }
 
@@ -650,7 +650,7 @@ bool LocalePreferences::getLocaleInfoCallback(LSHandle *sh,
     rootObj = 0;
 
 Done:
-    if (rootObj && !is_error(rootObj)) {
+    if (rootObj) {
         json_object_put(rootObj);
     }
 

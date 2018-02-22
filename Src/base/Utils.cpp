@@ -454,11 +454,11 @@ bool extractFromJson(const std::string& jsonString,const std::string& key,std::s
 	struct json_object* root = json_tokener_parse(jsonString.c_str());
 	struct json_object* label = 0;
 
-	if ((!root) || (is_error(root)))
+	if (!root)
 		return false;
 
 	label = json_object_object_get(root,key.c_str());
-	if ((!label) || (is_error(label))) {
+	if (!label) {
 		json_object_put(root);
 		return false;
 	}
@@ -470,13 +470,13 @@ bool extractFromJson(const std::string& jsonString,const std::string& key,std::s
 
 bool extractFromJson(struct json_object * root,const std::string& key,std::string& r_value)
 {
-	if ((!root) || (is_error(root)) || (key.length() == 0))
+	if (!root || (key.length() == 0))
 		return false;
 
 	struct json_object* label = 0;
 
 	label = json_object_object_get(root,key.c_str());
-	if ((!label) || (is_error(label))) {
+	if (!label) {
 		return false;
 	}
 
@@ -487,13 +487,13 @@ bool extractFromJson(struct json_object * root,const std::string& key,std::strin
 
 bool extractFromJson(struct json_object * root,const std::string& key,int& r_value)
 {
-	if ((!root) || (is_error(root)) || (key.length() == 0))
+	if (!root || (key.length() == 0))
 		return false;
 
 	struct json_object* label = 0;
 
 	label = json_object_object_get(root,key.c_str());
-	if ((!label) || (is_error(label))) {
+	if (!label) {
 		return false;
 	}
 
@@ -504,13 +504,13 @@ bool extractFromJson(struct json_object * root,const std::string& key,int& r_val
 
 bool extractFromJson(struct json_object * root,const std::string& key,bool& r_value)
 {
-	if ((!root) || (is_error(root)) || (key.length() == 0))
+	if (!root || (key.length() == 0))
 		return false;
 
 	struct json_object* label = 0;
 
 	label = json_object_object_get(root,key.c_str());
-	if ((!label) || (is_error(label))) {
+	if (!label) {
 		return false;
 	}
 
@@ -520,20 +520,20 @@ bool extractFromJson(struct json_object * root,const std::string& key,bool& r_va
 
 bool extractFromJson(struct json_object * root,const std::string& key,std::list<std::string>& r_value)
 {
-	if ((!root) || (is_error(root)) || (key.length() == 0))
+	if (!root || (key.length() == 0))
 		return false;
 
 	struct json_object* label = 0;
 
 	label = json_object_object_get(root,key.c_str());
-	if ((!label) || (is_error(label))) {
+	if (!label) {
 		return false;
 	}
 
 	int arrayLength = json_object_array_length(label);
 	for (int i=0;i<arrayLength; ++i) {
 		struct json_object* label_i = json_object_array_get_idx(label,i);
-		if ((!label_i) || (is_error(label_i))) {
+		if (!label_i) {
 			return false;
 		}
 		r_value.push_back(json_object_get_string(label_i));
@@ -544,13 +544,13 @@ bool extractFromJson(struct json_object * root,const std::string& key,std::list<
 
 struct json_object * JsonGetObject(struct json_object * root,const std::string& key)
 {
-	if ((!root) || (is_error(root)) || (key.length() == 0))
+	if (!root || (key.length() == 0))
 		return NULL;
 
 	struct json_object* label = 0;
 
 	label = json_object_object_get(root,key.c_str());
-	if ((!label) || (is_error(label))) {
+	if (!label) {
 		return NULL;
 	}
 

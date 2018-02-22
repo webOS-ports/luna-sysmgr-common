@@ -335,7 +335,7 @@ void Preferences::init()
 	
 Done:
 
-	if (json && !is_error(json))
+	if (json)
 		json_object_put(json);
 
 	if (statement)
@@ -393,11 +393,11 @@ bool Preferences::serverConnectCallback(LSHandle *sh, LSMessage *message, void *
 	
 	label = 0;		
 	json = json_tokener_parse(payload);
-	if (!json || is_error(json))
+	if (!json)
 		goto Done;
 
 	label = json_object_object_get(json, "connected");
-	if (!label || is_error(label))
+	if (!label)
 		goto Done;
 	connected = json_object_get_boolean(label);
 
@@ -444,7 +444,7 @@ bool Preferences::serverConnectCallback(LSHandle *sh, LSMessage *message, void *
 
 Done:
 
-	if (json && !is_error(json))
+	if (json)
 		json_object_put(json);
 
 	return true;
@@ -477,20 +477,20 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	Preferences * prefObjPtr = (Preferences *)ctx;
 	label = 0;		
 	json = json_tokener_parse(payload);
-	if (!json || is_error(json))
+	if (!json)
 		goto Done;
 		
 	g_message("Preferences::getPreferencesCallback(): toString -> [%s]\n", payload);
 	
 	label = json_object_object_get(json, "imeEnabled");
-	if (label && !is_error(label)) {
+	if (label) {
 
 		if (prefObjPtr)
 			prefObjPtr->m_imeEnabled = json_object_get_boolean(label);
 	}
 
 	label = json_object_object_get(json, "imeType");
-	if (label && !is_error(label)) {
+	if (label) {
 
         imeType = json_object_get_string(label);
 
@@ -515,85 +515,85 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 	
 	root_label = json_object_object_get(json, "ringtone");
-	if ((root_label) && (!is_error(root_label))) {
+	if (root_label) {
 		
 		label = json_object_object_get(root_label,"fullPath");
-		if ((label) && (!is_error(label))) {
+		if (label) {
 			if (prefObjPtr)
 				prefObjPtr->m_currentRingtoneFile = json_object_get_string(label);
 		}
 	}
 	
 	root_label = json_object_object_get(json, "alerttone");
-	if ((root_label) && (!is_error(root_label))) {
+	if (root_label) {
 
 		label = json_object_object_get(root_label,"fullPath");
-		if ((label) && (!is_error(label))) {
+		if (label) {
 			if (prefObjPtr)
 				prefObjPtr->m_currentAlerttoneFile = json_object_get_string(label);
 		}
 	}
 
 	root_label = json_object_object_get(json, "notificationtone");
-	if ((root_label) && (!is_error(root_label))) {
+	if (root_label) {
 
 		label = json_object_object_get(root_label,"fullPath");
-		if ((label) && (!is_error(label))) {
+		if (label) {
 			if (prefObjPtr)
 				prefObjPtr->m_currentNotificationtoneFile = json_object_get_string(label);
 		}
 	}
 
 	label = json_object_object_get(json, "wallpaper");
-	if (label && !is_error(label)) {
+	if (label) {
 
 		label = json_object_object_get(label, "wallpaperFile");
-		if (label && !is_error(label)) {
+		if (label) {
 			if (prefObjPtr)
 				Q_EMIT prefObjPtr->signalWallPaperChanged(json_object_get_string(label));
 		}
 	}
 
 	label = json_object_object_get(json, "dockwallpaper");
-	if (label && !is_error(label)) {
+	if (label) {
 
 		label = json_object_object_get(label, "wallpaperFile");
-		if (label && !is_error(label)) {
+		if (label) {
 			if (prefObjPtr)
 				Q_EMIT prefObjPtr->signalDockModeWallPaperChanged(json_object_get_string(label));
 		}
 	}
 
 	label = json_object_object_get(json, "showAlertsWhenLocked");
-	if (label && !is_error(label)) {
+	if (label) {
 		
 		if (prefObjPtr)
 			prefObjPtr->m_showAlertsWhenLocked = json_object_get_boolean(label);
 	}
 
 	label = json_object_object_get(json, "BlinkNotifications");
-	if (label && !is_error(label)) {
+	if (label) {
 		
 		if (prefObjPtr)
 			prefObjPtr->m_ledThrobberEnabled = json_object_get_boolean(label);
 	}
 
 	label = json_object_object_get(json, "systemSounds");
-	if (label && !is_error(label)) {
+	if (label) {
 
 		if (prefObjPtr)
 			prefObjPtr->m_playFeedbackSounds = json_object_get_boolean(label);
 	}
 
 	label = json_object_object_get(json, "sysUiNoHomeButtonMode");
-	if (label && !is_error(label)) {
+	if (label) {
 
 		if (prefObjPtr)
 			prefObjPtr->m_sysUiNoHomeButtonMode = json_object_get_boolean(label);
 	}
 
 	label = json_object_object_get(json, "sysUiEnableNextPrevGestures");
-	if (label && !is_error(label)) {
+	if (label) {
 
 		if (prefObjPtr) {
 			prefObjPtr->m_sysUiEnableNextPrevGestures = json_object_get_boolean(label);
@@ -604,7 +604,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 
 	label = json_object_object_get(json, "lockTimeout");
-	if (label && !is_error(label) && json_object_is_type(label, json_type_int)) {
+	if (label && json_object_is_type(label, json_type_int)) {
 
 		if (prefObjPtr) {
 			prefObjPtr->m_lockTimeout = json_object_get_int(label);
@@ -613,7 +613,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 
 	label = json_object_object_get(json, "dualRSSI");
-	if (label && !is_error(label) && json_object_is_type(label, json_type_boolean)) {
+	if (label && json_object_is_type(label, json_type_boolean)) {
 		if (prefObjPtr) {
 			prefObjPtr->m_dualRSSI = json_object_get_boolean(label);
 			if(prefObjPtr->m_dualRSSI) {
@@ -624,14 +624,14 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 
 	label = json_object_object_get(json, "hideWANAlert");
-	if (label && !is_error(label) && json_object_is_type(label, json_type_boolean)) {
+	if (label && json_object_is_type(label, json_type_boolean)) {
 		if (prefObjPtr) {
 			prefObjPtr->m_hideWANAlert = json_object_get_boolean(label);
 		}
 	}
 
 	label = json_object_object_get(json, "roamingIndicator");
-	if (label && !is_error(label)) {
+	if (label) {
 		if (prefObjPtr) {
 			prefObjPtr->m_roamingIndicator = json_object_get_string(label);
 			Q_EMIT prefObjPtr->signalRoamingIndicatorChanged();
@@ -642,7 +642,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 
 	label = json_object_object_get(json, "airplaneMode");
-	if (label && !is_error(label) && json_object_is_type(label, json_type_boolean)) {
+	if (label && json_object_is_type(label, json_type_boolean)) {
 		if (prefObjPtr) {
 			MutexLocker locker(&prefObjPtr->m_mutex);
 			prefObjPtr->m_airplaneMode = json_object_get_boolean(label);
@@ -651,7 +651,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 
 	label = json_object_object_get(json, "wifiRadio");
-	if (label && !is_error(label) && json_object_is_type(label, json_type_boolean)) {
+	if (label && json_object_is_type(label, json_type_boolean)) {
 		if (prefObjPtr) {
 			MutexLocker locker(&prefObjPtr->m_mutex);
 			prefObjPtr->m_wifiOn = json_object_get_boolean(label);
@@ -659,7 +659,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 
 	label = json_object_object_get(json, "bluetoothRadio");
-	if (label && !is_error(label) && json_object_is_type(label, json_type_boolean)) {
+	if (label && json_object_is_type(label, json_type_boolean)) {
 		if (prefObjPtr) {
 			MutexLocker locker(&prefObjPtr->m_mutex);
 			prefObjPtr->m_bluetoothOn = json_object_get_boolean(label);
@@ -667,7 +667,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 
 	label = json_object_object_get(json, "rotationLock");
-	if (label && !is_error(label) && json_object_is_type(label, json_type_int)) {
+	if (label && json_object_is_type(label, json_type_int)) {
 		if (prefObjPtr) {
 			MutexLocker locker(&prefObjPtr->m_mutex);
             prefObjPtr->m_rotationLock = (OrientationEvent::Orientation)json_object_get_int(label);
@@ -676,7 +676,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 
 	label = json_object_object_get(json, "muteSound");
-	if (label && !is_error(label) && json_object_is_type(label, json_type_boolean)) {
+	if (label && json_object_is_type(label, json_type_boolean)) {
 		if (prefObjPtr) {
 			MutexLocker locker(&prefObjPtr->m_mutex);
 			prefObjPtr->m_muteOn = json_object_get_boolean(label);
@@ -685,15 +685,15 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 
 //	label = json_object_object_get(json, PALM_VIRTUAL_KEYBOARD_SETTINGS);
-//	if ((label) && (!is_error(label)))
+//	if (label)
 //		VirtualKeyboardPreferences::instance().virtualKeyboardSettingsChanged(json_object_get_string(label));
 
 //	label = json_object_object_get(json, PALM_VIRTUAL_KEYBOARD_PREFS);
-//	if ((label) && (!is_error(label)))
+//	if (label)
 //		VirtualKeyboardPreferences::instance().virtualKeyboardPreferencesChanged(json_object_get_string(label));
 
 	label = json_object_object_get(json, "enableVoiceCommand");
-	if (label && !is_error(label)) {
+	if (label) {
 
 		if (prefObjPtr)
 		{
@@ -704,7 +704,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 
 
 	label = json_object_object_get(json, "enableALS");
-	if (label && !is_error(label)) {
+	if (label) {
 		if (prefObjPtr) 
 		{
 			prefObjPtr->m_enableALS = json_object_get_boolean(label);
@@ -713,7 +713,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	}
 Done:
 
-	if (json && !is_error(json))
+	if (json)
 		json_object_put(json);
 
 	return true;
