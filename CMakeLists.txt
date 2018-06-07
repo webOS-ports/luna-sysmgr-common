@@ -108,8 +108,10 @@ target_link_libraries(LunaSysMgrCommon
     ${SQLITE3_LIBRARIES}
     ${PMLOGLIB_LIBRARIES}
     ${JSON_LIBRARIES}
+    Qt5::Core
+    Qt5::Gui
+    Qt5::Widgets
     pthread)
-qt5_use_modules(LunaSysMgrCommon Core Gui Widgets)
 
 install(DIRECTORY include/ DESTINATION ${WEBOS_INSTALL_INCLUDEDIR}/sysmgr-common FILES_MATCHING PATTERN "*.h")
 
