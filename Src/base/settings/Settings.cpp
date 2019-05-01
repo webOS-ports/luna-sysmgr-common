@@ -850,6 +850,7 @@ void Settings::identifyHardware()
 
 	while (true) {
 		QByteArray line = cpuinfo.readLine();
+		if(line.isEmpty()) break;
 
 		if (line.startsWith("Hardware") || line.startsWith("vendor_id")) {
 			QList<QByteArray> parts = line.split(':');
