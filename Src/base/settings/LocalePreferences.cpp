@@ -324,7 +324,10 @@ void LocalePreferences::registerService()
     LSError error;
     LSErrorInit(&error);
 
-    ret = LSRegister(NULL, &m_lsHandle, &error);
+	char prefsServiceName[256] = {0};
+	snprintf(prefsServiceName, 255, "com.palm.systemmanager-localeprefs-%d", getpid());
+
+	ret = LSRegister(prefsServiceName, &m_lsHandle, &error);
     if (!ret) {
         g_critical("Failed to register handler: %s", error.message);
         LSErrorFree(&error);
