@@ -28,6 +28,7 @@
 
 #include <Qt>
 #include <QImage>
+#include <QObject>
 
 class QWidget;
 

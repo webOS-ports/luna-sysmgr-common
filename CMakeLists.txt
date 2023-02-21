@@ -13,19 +13,9 @@ webos_add_compiler_flags(ALL -fno-rtti -fno-exceptions -Wall -fpermissive)
 webos_add_compiler_flags(ALL -DFIX_FOR_QT)
 webos_add_compiler_flags(ALL -Wno-unused-parameter -Wno-unused-variable -Wno-reorder -Wno-missing-field-initializers -Wno-extra)
 
-find_package(Qt5Core REQUIRED)
-if(NOT Qt5Core_FOUND)
-    message(FATAL_ERROR "Qt5Core module is required!")
-endif()
-
-find_package(Qt5Gui REQUIRED)
-if(NOT Qt5Gui_FOUND)
-    message(FATAL_ERROR "Qt5Gui module is required!")
-endif()
-
-find_package(Qt5Widgets REQUIRED)
-if(NOT Qt5Widgets_FOUND)
-    message(FATAL_ERROR "Qt5Widgets module is required!")
+find_package(Qt6 COMPONENTS Core Gui Widgets REQUIRED)
+if (NOT Qt6_FOUND)
+    find_package(Qt5 5.15 REQUIRED COMPONENTS Core Gui Widgets)
 endif()
 
 find_package(PkgConfig "0.22" REQUIRED)
@@ -108,9 +98,9 @@ target_link_libraries(LunaSysMgrCommon
     ${SQLITE3_LIBRARIES}
     ${PMLOGLIB_LIBRARIES}
     ${JSON_LIBRARIES}
-    Qt5::Core
-    Qt5::Gui
-    Qt5::Widgets
+    Qt::Core
+    Qt::Gui
+    Qt::Widgets
     pthread)
 
 install(DIRECTORY include/ DESTINATION ${WEBOS_INSTALL_INCLUDEDIR}/sysmgr-common FILES_MATCHING PATTERN "*.h")
