@@ -224,11 +224,7 @@ Settings::Settings()
 	, displayUiRotates(false)
 	, tabletUi(false)
 	, dpi(132)
-	, compatDpi(132)
-	, pixmapFactor(4.0)
 	, layoutScale(1.0)
-	, layoutScaleCompat(1.0)
-	, pixmapScale(0.25)
 	, gridUnit(8)
 	, homeButtonOrientationAngle(0)
 	, positiveSpaceTopPadding(24)
@@ -541,8 +537,6 @@ void Settings::load(const char* settingsFile)
 	KEY_BOOLEAN("UI", "DisplayUiRotates", displayUiRotates);
 	KEY_BOOLEAN("UI", "TabletUi", tabletUi);
 	KEY_INTEGER("UI", "DPI", dpi);
-	KEY_INTEGER("UI", "CompatDPI", compatDpi);
-	KEY_DOUBLE("UI", "PixmapFactor", pixmapFactor);
 	KEY_DOUBLE("UI", "GridUnit", gridUnit);
 	KEY_INTEGER("UI", "HomeButtonOrientationAngle", homeButtonOrientationAngle);
 	KEY_INTEGER("UI", "PositiveSpaceTopPadding", positiveSpaceTopPadding);
@@ -774,9 +768,7 @@ void Settings::postLoad()
 	
 	//Calculate UI Scaling
 	layoutScale = dpi / 132; //132 is the base DPI for luna and it's assets
-	layoutScaleCompat = compatDpi / 132;
-	pixmapScale = layoutScale / pixmapFactor;
-	
+
 	positiveSpaceTopPadding *= layoutScale;
 	positiveSpaceBottomPadding *= layoutScale;
 	statusBarTitleMaxWidth *= layoutScale;
