@@ -226,12 +226,8 @@ public:
 	bool                displayUiRotates;
 	bool                tabletUi;
 	qreal               dpi;
-	qreal               compatDpi;
 	std::set<std::string>    compatApps;
-	qreal               pixmapFactor;
 	qreal               layoutScale;
-	qreal               layoutScaleCompat;
-	qreal               pixmapScale;
 	qreal               gridUnit;
 	int                 homeButtonOrientationAngle;
 
