@@ -23,7 +23,7 @@
 #include "Common.h"
 
 #include <string>
-#include <lunaservice.h>
+#include <luna-service2/lunaservice.h>
 
 #include "Mutex.h"
 #include "CustomEvents.h"

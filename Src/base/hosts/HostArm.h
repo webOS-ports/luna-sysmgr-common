@@ -36,7 +36,7 @@
 #if defined(HAS_HIDLIB)
 #include "HidLib.h"
 #endif
-#include "lunaservice.h"
+#include <luna-service2/lunaservice.h>
 
 #include <qsocketnotifier.h>
 #include <QObject>
