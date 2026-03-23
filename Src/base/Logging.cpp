@@ -35,7 +35,7 @@
 #include "MutexLocker.h"
 #include "Settings.h"
 
-static GStaticMutex s_mutex       = G_STATIC_MUTEX_INIT;
+static GMutex s_mutex;
 static bool         s_initialized = false;
 static GHashTable*  s_channelHash = 0;
 
@@ -65,7 +65,7 @@ bool LunaChannelEnabled(const char* channel)
 
 	bool ret = false;
 	
-	g_static_mutex_lock(&s_mutex);
+	g_mutex_lock(&s_mutex);
 		
 	if (!s_initialized) {
 
@@ -97,7 +97,7 @@ bool LunaChannelEnabled(const char* channel)
 
  Done:	
 
-	g_static_mutex_unlock(&s_mutex);
+	g_mutex_unlock(&s_mutex);
 
 	return ret;
 }
@@ -228,7 +228,7 @@ static gpointer PrvLogThread(gpointer arg)
 static void PrvCreateLogThread()
 {
 	sLogAsyncQueue = g_async_queue_new();
-	sLogThread = g_thread_create(PrvLogThread, 0, false, NULL);
+	sLogThread = g_thread_new("Logging", PrvLogThread, NULL);
 }
 
 static void PrvLogAtForkPrepare()

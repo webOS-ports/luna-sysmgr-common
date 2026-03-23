@@ -46,7 +46,7 @@ private:
 	int m_pipeFd[2];
 	GIOChannel* m_ioChannel;
 	GSource* m_ioSource;
-	GStaticRecMutex* m_mutex;
+	GRecMutex* m_mutex;
 };
 
 template <class Target>

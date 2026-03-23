@@ -40,7 +40,7 @@ public:
 
 private:
 
-	GStaticRecMutex* m_mutex;
+	GRecMutex* m_mutex;
 };
 
 #endif /* MUTEX_H */
