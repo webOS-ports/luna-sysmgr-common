@@ -290,7 +290,9 @@ int HostArm::readHidEvents(int fd, struct input_event* eventBuf, int bufSize)
 {
 	struct sockaddr_un sender;
 	int fromLen = sizeof(sender);
-	int numBytes = recvfrom(fd, eventBuf, bufSize, O_NONBLOCK,
+	// MSG_DONTWAIT is the per-call non-blocking flag; O_NONBLOCK here would
+	// silently be interpreted as MSG_CONFIRM
+	int numBytes = recvfrom(fd, eventBuf, bufSize, MSG_DONTWAIT,
 				(struct sockaddr*)&sender, (socklen_t*)&fromLen);
 
 	if (numBytes < 0) {
@@ -366,11 +368,22 @@ Error:
 		LSErrorFree(&lserror);
 	}
 
+	if (m_service) {
+		LSError unregError;
+		LSErrorInit(&unregError);
+		if (!LSUnregister(m_service, &unregError))
+			LSErrorFree(&unregError);
+		m_service = 0;
+	}
+
 	g_debug(":%s: Unable to start service", __PRETTY_FUNCTION__);
 }
 
 void HostArm::stopService()
 {
+	if (!m_service)
+		return;
+
 	LSError lserror;
 	LSErrorInit(&lserror);
 	bool result;
@@ -380,6 +393,7 @@ void HostArm::stopService()
 		LSErrorPrint(&lserror, stderr);
 		LSErrorFree(&lserror);
 	}
+	m_service = 0;
 }
 
 const char* HostArm::hardwareName() const
@@ -450,7 +464,7 @@ bool HostArm::getMsgValueInt(LSMessage* msg, int& value)
 #if defined(HAS_HIDLIB)
 bool HostArm::switchStateCallback(LSHandle* handle, LSMessage* msg, void* data)
 {
-	int switchCode = (int)data;
+	int switchCode = (int)(intptr_t)data;
 	int value = -1;
 	
 	if (!HostArm::getMsgValueInt(msg, value))
@@ -486,6 +500,9 @@ bool HostArm::switchStateCallback(LSHandle* handle, LSMessage* msg, void* data)
 
 void HostArm::getInitialSwitchStates()
 {
+	if (!m_service)
+		return;
+
 	LSError err;
 	LSErrorInit(&err);
 
