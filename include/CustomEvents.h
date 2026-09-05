@@ -30,7 +30,7 @@ enum SysMgrNativeKeyboardModifiers
 {
 	SysMgrNativeKeyboardModifier_None          = 0,
 	SysMgrNativeKeyboardModifier_InitialState  = 1 << 0,
-	SysMgrNativeKeyboardModifier_Last          = 1 << 31
+	SysMgrNativeKeyboardModifier_Last          = 1u << 31
 };
 
 
@@ -87,7 +87,7 @@ public:
         Shake_Start,
         Shake_Shaking,
         Shake_End,
-        Shake_Last = 1 << 31
+        Shake_Last = 1u << 31
     };
 
     ShakeEvent(Shake shakeState, float shakeMagnitude) :
@@ -96,6 +96,9 @@ public:
         m_shakeMagnitude(shakeMagnitude)
     {
     }
+
+    Shake shakeState() const { return m_shakeState; }
+    float shakeMagnitude() const { return m_shakeMagnitude; }
 
 private:
     Shake   m_shakeState;
@@ -116,7 +119,7 @@ public:
         Orientation_Right,
         Orientation_Landscape,
         Orientation_Portrait,
-        Orientation_Last = 1 << 31
+        Orientation_Last = 1u << 31
     };
 
     OrientationEvent(Orientation orientation, float pitch, float roll) :

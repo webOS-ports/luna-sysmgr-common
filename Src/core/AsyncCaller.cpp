@@ -36,7 +36,7 @@ AsyncCallerBase::AsyncCallerBase(GMainLoop* loop, gint sourcePriority)
 	// setup an iochannel on the read end of the pipe
 	m_ioChannel =  g_io_channel_unix_new(m_pipeFd[0]);
 	m_ioSource = g_io_create_watch(m_ioChannel, (GIOCondition) G_IO_IN);
-	g_source_set_callback(m_ioSource, (GSourceFunc) callback, this, NULL);
+	g_source_set_callback(m_ioSource, G_SOURCE_FUNC(callback), this, NULL);
 	g_source_set_can_recurse(m_ioSource, true);
 	g_source_set_priority(m_ioSource, sourcePriority);
 
