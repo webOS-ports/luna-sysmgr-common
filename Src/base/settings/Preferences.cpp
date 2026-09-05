@@ -98,6 +98,9 @@ bool Preferences::airplaneMode() const
 
 bool Preferences::setAirplaneMode(bool on)
 {
+	// lock only the member write (see the m_mutex comment in Preferences.h):
+	// it publishes the value to getters on other threads, while the LSCall
+	// below stays outside the critical section to avoid re-entrancy deadlocks
 	{
 		MutexLocker locker(&m_mutex);
 		m_airplaneMode = on;

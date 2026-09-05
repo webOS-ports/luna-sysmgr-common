@@ -300,10 +300,11 @@ public:
 	bool                hasBrightnessControl;
 
 	static inline Settings*  LunaSettings() {
-		if (G_LIKELY(s_settings))
-			return s_settings;
-
-		// function-local static: thread-safe one-time construction (C++11)
+		// A function-local static is initialized exactly once even when two
+		// threads race into the first call (guaranteed since C++11, via a
+		// compiler-generated guard); the old "check pointer, then new" could
+		// construct Settings twice and leak one instance. The pointer is
+		// mirrored into s_settings for code inlined against older headers.
 		static Settings* inst = (s_settings = new Settings());
 		return inst;
 	}

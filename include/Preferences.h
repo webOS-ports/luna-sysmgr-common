@@ -141,6 +141,13 @@ private:
 	bool m_muteOn;
 	bool m_enableALS;
 	
+	// Guards every member read/written from both the client threads (getters/
+	// setters) and the luna-service callback. Even single bool/int stores are
+	// locked: the lock is what publishes the new value to a getter running on
+	// another CPU (an unlocked store next to locked loads is a C++ data race,
+	// and nothing orders the memory access). The critical sections are kept
+	// deliberately small - never around LSCall or Q_EMIT - so a slot or
+	// service callback re-entering Preferences cannot deadlock.
 	mutable Mutex m_mutex;
 	LSHandle* m_lsHandle;
 	LSMessageToken m_serverStatusToken;	
