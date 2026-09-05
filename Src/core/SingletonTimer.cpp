@@ -84,7 +84,18 @@ SingletonTimer::SingletonTimer(GMainLoop* loop)
 
 SingletonTimer::~SingletonTimer()
 {
-    // FIXME: NO-OP
+	if (m_source) {
+		// detach from the main context first so prepare/check/dispatch can
+		// never run against a destroyed parent
+		g_source_destroy(&(m_source->source));
+		g_source_unref(&(m_source->source));
+		m_source = 0;
+	}
+
+	// the TimerHandles themselves are owned by their creators (via deref);
+	// only the list container belongs to us
+	g_list_free(m_activeList);
+	m_activeList = 0;
 }
 
 uint64_t SingletonTimer::currentTime()
@@ -163,12 +174,13 @@ void SingletonTimer::deref(TimerHandle* timer)
 
 void SingletonTimer::destroy(TimerHandle* timer)
 {
-    if (!timer)
-        return;
+	if (!timer)
+		return;
 
 	if (timer->inActiveList)
 		m_activeList = g_list_remove(m_activeList, timer);
-    Free(TimerHandle, timer);    
+
+	Free(TimerHandle, timer);
 }
 
 static TimerHandle* PrvFindMinTimer(GList* list)
@@ -182,7 +194,7 @@ static TimerHandle* PrvFindMinTimer(GList* list)
 
 gboolean SingletonTimer::timerPrepare(GSource* source, gint* timeout)
 {
-	SingletonTimer* st = ((TimerSource*)(source))->parent;
+	SingletonTimer* st = (reinterpret_cast<TimerSource*>(source))->parent;
 	
 	TimerHandle* minTimer = PrvFindMinTimer(st->m_activeList);
 	if (!minTimer) {
@@ -206,7 +218,7 @@ gboolean SingletonTimer::timerPrepare(GSource* source, gint* timeout)
 
 gboolean SingletonTimer::timerCheck(GSource* source)
 {
-	SingletonTimer* st = ((TimerSource*)(source))->parent;
+	SingletonTimer* st = (reinterpret_cast<TimerSource*>(source))->parent;
 
 	TimerHandle* minTimer = PrvFindMinTimer(st->m_activeList);
 	if (!minTimer)
@@ -223,7 +235,7 @@ gboolean SingletonTimer::timerCheck(GSource* source)
 
 gboolean SingletonTimer::timerDispatch(GSource* source, GSourceFunc callback, gpointer userData)
 {
-	SingletonTimer* st = ((TimerSource*)(source))->parent;
+	SingletonTimer* st = (reinterpret_cast<TimerSource*>(source))->parent;
 
 	TimerHandle* minTimer = PrvFindMinTimer(st->m_activeList);
 	if (!minTimer)

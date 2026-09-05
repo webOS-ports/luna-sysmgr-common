@@ -72,6 +72,9 @@ void TimerBase::callback(void* arg)
 	t->start(t->m_interval, false);
 */
 
+	// NOTE: the timeout() handler must not delete this TimerBase; the code
+	// below still dereferences 't' after the handler returns. Deleting the
+	// timer from its own callback is a use-after-free.
 	TimerBase* t = (TimerBase*) arg;
 
 	SingletonTimer* master = t->m_master;
