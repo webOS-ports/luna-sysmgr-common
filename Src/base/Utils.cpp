@@ -74,7 +74,9 @@ char* readFile(const char* filePath)
 	fseek(f, 0L, SEEK_END);
 	long sz = ftell(f);
 	fseek( f, 0L, SEEK_SET );
-	if (!sz) {
+	// ftell returns -1 for unseekable paths (directories, fifos); a negative
+	// size would underflow the allocation below
+	if (sz <= 0) {
 		fclose(f);
 		return 0;
 	}
@@ -159,12 +161,12 @@ bool writeToTempFile(const std::string& data,const std::string& tempDir,std::str
 	return (nwritten == totalsize);
 }
 
-#define RDBUFFSIZE		(1024*32)
+#define RDBUFFSIZE		(1024UL*32UL)
 bool  concatToTempFile(std::vector<std::string>& files,const std::string& tempDir,std::string& r_outputFile)
 {
 	std::string templateStr = tempDir + std::string("fileXXXXXX");
 	char * templateFileName = new char[templateStr.length()+2];
-	strcpy(templateFileName,templateStr.c_str());
+	memcpy(templateFileName,templateStr.c_str(),templateStr.length()+1);
 	int fd = mkstemp(templateFileName);
 	r_outputFile = std::string(templateFileName);
 	delete[] templateFileName;
@@ -182,7 +184,8 @@ bool  concatToTempFile(std::vector<std::string>& files,const std::string& tempDi
 			continue;			// silent on unable to read a particular file
 
 		size_t nread = 0;
-		while ((nread = fread (rdbuffer,1,RDBUFFSIZE,infp)) > 0) {
+		while (!feof(infp) && !ferror(infp)
+				&& (nread = fread (rdbuffer,1,RDBUFFSIZE,infp)) > 0) {
 			//ssize_t write(int fildes, const void *buf, size_t nbyte);
 			ssize_t nwritten = 0;
 			ssize_t totalsize = nread;
@@ -331,7 +334,6 @@ int splitFileAndExtension(const std::string& srcFileAndExt,std::string& filePart
 
 int splitStringOnKey(std::vector<std::string>& returnSplitSubstrings,const std::string& baseStr,const std::string& delims) {
 
-	std::string base = trimWhitespace(baseStr);
 	std::string::size_type start = 0;
 	std::string::size_type mark = 0;
 	std::string extracted;
@@ -463,36 +465,49 @@ bool extractFromJson(const std::string& jsonString,const std::string& key,std::s
 		return false;
 	}
 
-	r_value = json_object_get_string(label);
+	// json_object_get_string returns NULL for a JSON null value
+	const char* str = json_object_get_string(label);
+	if (!str) {
+		json_object_put(root);
+		return false;
+	}
+
+	r_value = str;
 	json_object_put(root);
 	return true;
 }
 
-bool extractFromJson(struct json_object * root,const std::string& key,std::string& r_value)
+bool extractFromJson(const struct json_object * root,const std::string& key,std::string& r_value)
 {
 	if (!root || (key.length() == 0))
 		return false;
 
 	struct json_object* label = 0;
 
-	label = json_object_object_get(root,key.c_str());
+	label = json_object_object_get(const_cast<struct json_object *>(root),key.c_str());
 	if (!label) {
 		return false;
 	}
 
-	r_value = json_object_get_string(label);
+	// json_object_get_string returns NULL for a JSON null value
+	const char* str = json_object_get_string(label);
+	if (!str) {
+		return false;
+	}
+
+	r_value = str;
 	return true;
 }
 
 
-bool extractFromJson(struct json_object * root,const std::string& key,int& r_value)
+bool extractFromJson(const struct json_object * root,const std::string& key,int& r_value)
 {
 	if (!root || (key.length() == 0))
 		return false;
 
 	struct json_object* label = 0;
 
-	label = json_object_object_get(root,key.c_str());
+	label = json_object_object_get(const_cast<struct json_object *>(root),key.c_str());
 	if (!label) {
 		return false;
 	}
@@ -502,14 +517,14 @@ bool extractFromJson(struct json_object * root,const std::string& key,int& r_val
 }
 
 
-bool extractFromJson(struct json_object * root,const std::string& key,bool& r_value)
+bool extractFromJson(const struct json_object * root,const std::string& key,bool& r_value)
 {
 	if (!root || (key.length() == 0))
 		return false;
 
 	struct json_object* label = 0;
 
-	label = json_object_object_get(root,key.c_str());
+	label = json_object_object_get(const_cast<struct json_object *>(root),key.c_str());
 	if (!label) {
 		return false;
 	}
@@ -518,15 +533,19 @@ bool extractFromJson(struct json_object * root,const std::string& key,bool& r_va
 	return true;
 }
 
-bool extractFromJson(struct json_object * root,const std::string& key,std::list<std::string>& r_value)
+bool extractFromJson(const struct json_object * root,const std::string& key,std::list<std::string>& r_value)
 {
 	if (!root || (key.length() == 0))
 		return false;
 
 	struct json_object* label = 0;
 
-	label = json_object_object_get(root,key.c_str());
+	label = json_object_object_get(const_cast<struct json_object *>(root),key.c_str());
 	if (!label) {
+		return false;
+	}
+
+	if (!json_object_is_type(label, json_type_array)) {
 		return false;
 	}
 
@@ -536,29 +555,29 @@ bool extractFromJson(struct json_object * root,const std::string& key,std::list<
 		if (!label_i) {
 			return false;
 		}
-		r_value.push_back(json_object_get_string(label_i));
+		const char* str = json_object_get_string(label_i);
+		if (!str) {
+			return false;
+		}
+		r_value.push_back(str);
 	}
 	return true;
 }
 
 
-struct json_object * JsonGetObject(struct json_object * root,const std::string& key)
+struct json_object * JsonGetObject(const struct json_object * root,const std::string& key)
 {
 	if (!root || (key.length() == 0))
 		return NULL;
 
 	struct json_object* label = 0;
 
-	label = json_object_object_get(root,key.c_str());
+	label = json_object_object_get(const_cast<struct json_object *>(root),key.c_str());
 	if (!label) {
 		return NULL;
 	}
 
 	return label;
-}
-
-static inline bool is_base64(unsigned char c) {
-  return (isalnum(c) || (c == '+') || (c == '/'));
 }
 
 std::string base64_encode(unsigned char const* bytes_to_encode, unsigned int in_len) {
@@ -619,10 +638,10 @@ int determineEnclosingDir(const std::string& fileNameAndPath,std::string& r_encl
 	else
 	{
 		std::string::size_type pos;
-		if ((pos = fileNameAndPath.rfind("/")) == std::string::npos)
+		if ((pos = fileNameAndPath.rfind('/')) == std::string::npos)
 			r_enclosingDir = "/";
 		else
-			r_enclosingDir = fileNameAndPath.substr(0,pos-1);
+			r_enclosingDir = fileNameAndPath.substr(0,pos);
 	}
 	if (r_enclosingDir[0] != '/')
 		r_enclosingDir.insert(0,"/");
@@ -636,10 +655,14 @@ std::string string_printf(const char *format, ...)
 	va_list args;
 	va_start(args, format);
 	char stackBuffer[1024];
+	// a va_list is consumed by vsnprintf; keep a copy for the retry path
+	va_list argsCopy;
+	va_copy(argsCopy, args);
 	int result = vsnprintf(stackBuffer, G_N_ELEMENTS(stackBuffer), format, args);
+	va_end(args);
 	if (result > -1 && result < (int) G_N_ELEMENTS(stackBuffer))
 	{	// stack buffer was sufficiently large. Common case with no temporary dynamic buffer.
-		va_end(args);
+		va_end(argsCopy);
 		return std::string(stackBuffer, result);
 	}
 
@@ -653,9 +676,12 @@ std::string string_printf(const char *format, ...)
 			length *= 3;
 		}
 		buffer = new char[length];
-		result = vsnprintf(buffer, length, format, args);
+		va_list argsRetry;
+		va_copy(argsRetry, argsCopy);
+		result = vsnprintf(buffer, length, format, argsRetry);
+		va_end(argsRetry);
 	} while (result == -1 && result < length);
-	va_end(args);
+	va_end(argsCopy);
 	std::string	str(buffer, result);
 	delete[] buffer;
 	return str;
@@ -668,10 +694,14 @@ std::string & append_format(std::string & str, const char * format, ...)
 	va_list args;
 	va_start(args, format);
 	char stackBuffer[1024];
+	// a va_list is consumed by vsnprintf; keep a copy for the retry path
+	va_list argsCopy;
+	va_copy(argsCopy, args);
 	int result = vsnprintf(stackBuffer, G_N_ELEMENTS(stackBuffer), format, args);
+	va_end(args);
 	if (result > -1 && result < (int) G_N_ELEMENTS(stackBuffer))
 	{	// stack buffer was sufficiently large. Common case with no temporary dynamic buffer.
-		va_end(args);
+		va_end(argsCopy);
 		str.append(stackBuffer, result);
 		return str;
 	}
@@ -686,9 +716,12 @@ std::string & append_format(std::string & str, const char * format, ...)
 			length *= 3;
 		}
 		buffer = new char[length];
-		result = vsnprintf(buffer, length, format, args);
+		va_list argsRetry;
+		va_copy(argsRetry, argsCopy);
+		result = vsnprintf(buffer, length, format, argsRetry);
+		va_end(argsRetry);
 	} while (result == -1 && result < length);
-	va_end(args);
+	va_end(argsCopy);
 	str.append(buffer, result);
 	delete[] buffer;
 	return str;
