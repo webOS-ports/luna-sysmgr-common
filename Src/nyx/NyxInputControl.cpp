@@ -49,7 +49,7 @@ bool NyxInputControl::on()
         error = nyx_device_set_operating_mode(m_handle, NYX_OPERATING_MODE_ON);
         return (error == NYX_ERROR_NONE || error == NYX_ERROR_NOT_IMPLEMENTED);
     }
-    return true;
+    return false;
 }
 
 bool NyxInputControl::off()
@@ -60,7 +60,7 @@ bool NyxInputControl::off()
         error = nyx_device_set_operating_mode(m_handle, NYX_OPERATING_MODE_OFF);
         return (error == NYX_ERROR_NONE || error == NYX_ERROR_NOT_IMPLEMENTED);
     }
-    return true;
+    return false;
 }
 
 bool NyxInputControl::setRate(nyx_report_rate_t rate)
@@ -71,5 +71,5 @@ bool NyxInputControl::setRate(nyx_report_rate_t rate)
         error = nyx_device_set_report_rate(m_handle, rate);
         return (error == NYX_ERROR_NONE || error == NYX_ERROR_NOT_IMPLEMENTED);
     }
-    return true;
+    return false;
 }

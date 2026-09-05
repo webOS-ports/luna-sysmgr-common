@@ -28,9 +28,9 @@
 CoreNaviLeds* CoreNaviLeds::m_instance = NULL;
 
 CoreNaviLeds::CoreNaviLeds() :
-    m_device(NULL)
-    ,m_config(NULL)
+    m_config(NULL)
     ,m_lightbarEnabled(Settings::LunaSettings()->lightbarEnabled)
+    ,m_device(NULL)
 {
 	nyx_error_t error = NYX_ERROR_NONE;
 	error = nyx_device_open(NYX_DEVICE_LED_CONTROLLER, "Default", &m_device);
@@ -44,11 +44,22 @@ CoreNaviLeds::CoreNaviLeds() :
 CoreNaviLeds::~CoreNaviLeds()
 {
 	nyx_error_t error = NYX_ERROR_NONE;
-    error = nyx_device_close(m_device);
 
-    if (error != NYX_ERROR_NONE)
-        g_critical("Could not close device led controller");
+    if (m_config != NULL)
+    {
+        error = nyx_led_controller_core_configuration_release(m_config);
+        if (error != NYX_ERROR_NONE)
+            g_critical("Could not release CoreNavi effect configuration");
+        m_config = NULL;
+    }
 
+    if (m_device != NULL)
+    {
+        error = nyx_device_close(m_device);
+        if (error != NYX_ERROR_NONE)
+            g_critical("Could not close device led controller");
+        m_device = NULL;
+    }
 }
 
 void CoreNaviLeds::configureParameters(int n, ...)
@@ -76,8 +87,7 @@ void CoreNaviLeds::configureParameters(int n, ...)
 
 void CoreNaviLeds::finalizeAndExecute()
 {
-    nyx_error_t error = NYX_ERROR_NONE;
-    nyx_led_controller_core_configuration_finalize(m_config);
+    nyx_error_t error = nyx_led_controller_core_configuration_finalize(m_config);
 
     if (error != NYX_ERROR_NONE)
         g_critical("Could not finalize CoreNavi effect!");
@@ -162,7 +172,7 @@ void CoreNaviLeds::ledFade(int led, int brightness, int cFadeIn, int cFadeOut, i
                         NYX_LED_CONTROLLER_CORE_EFFECT_SIDE_FADE_IN, sFadeIn,
                         NYX_LED_CONTROLLER_CORE_EFFECT_SIDE_FADE_OUT, sFadeOut);
 
-
+    finalizeAndExecute();
 }
 
 void CoreNaviLeds::ledFullFade(int brightness, int firstIn,int firstOut,int secondIn, int secondOut,int thirdOut,bool left)
