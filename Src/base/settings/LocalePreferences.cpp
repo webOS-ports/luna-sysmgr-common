@@ -51,10 +51,8 @@ static const char *kLocaleInfo_Clock = "clock";
 
 LocalePreferences* LocalePreferences::instance()
 {
-    static LocalePreferences* s_prefs = 0;
-    if (!s_prefs)
-        s_prefs = new LocalePreferences();
-
+    // function-local static: thread-safe one-time construction (C++11)
+    static LocalePreferences* s_prefs = new LocalePreferences();
     return s_prefs;
 }
 
@@ -174,12 +172,12 @@ void LocalePreferences::init()
             goto Done;
 
         label = json_object_object_get(json, "languageCode");
-        if (!label)
+        if (!label || !json_object_get_string(label))
             goto Done;
         languageCode = json_object_get_string(label);
 
         label = json_object_object_get(json, "countryCode");
-        if (!label)
+        if (!label || !json_object_get_string(label))
             goto Done;
         countryCode = json_object_get_string(label);
 
@@ -192,7 +190,7 @@ void LocalePreferences::init()
         if (subobj){
             label = json_object_object_get(subobj, "countryCode");
 
-            if (label){
+            if (label && json_object_get_string(label)){
                 m_phoneRegion = json_object_get_string(label);
             }
         }
@@ -224,7 +222,7 @@ void LocalePreferences::init()
             goto Done;
 
         label = json_object_object_get(json, "countryCode");
-        if (!label)
+        if (!label || !json_object_get_string(label))
             goto Done;
         m_localeRegion = json_object_get_string(label);
 
@@ -264,12 +262,14 @@ void LocalePreferences::init()
 
         label = json_object_object_get(json, kLocaleInfo_Locales);
 
-        if (!label) {
+        if (!label || !json_object_is_type(label, json_type_object)) {
             goto Done;
         }
 
         json_object_object_foreach(label, keyName, valueName) {
-            m_locales.locales.insert(keyName, json_object_get_string(valueName));
+            const char* localeValue = json_object_get_string(valueName);
+            if (localeValue)
+                m_locales.locales.insert(keyName, localeValue);
         }
 
         label = json_object_object_get(json, kLocaleInfo_Timezone);
@@ -440,19 +440,15 @@ bool LocalePreferences::getPreferencesCallback(LSHandle *sh, LSMessage *message,
         return true;
 
     json_object* label = 0;
-    json_object* root_label = 0;
     json_object* json = 0;
     json_object* value = 0;
     json_object* subobject = 0;
 
     const char* languageCode = 0;
     const char* countryCode = 0;
-    const char* phoneRegion = 0;
     std::string newLocale;
     std::string newLocaleRegion;
     std::string newPhoneRegion;
-
-    const char* imeType = 0;
 
     LocalePreferences * prefObjPtr = (LocalePreferences *)ctx;
     label = 0;
@@ -480,13 +476,19 @@ bool LocalePreferences::getPreferencesCallback(LSHandle *sh, LSMessage *message,
         if (subobject) {
             label = json_object_object_get(subobject, "countryCode");
             if (label) {
-                newPhoneRegion = json_object_get_string(label);
+                const char* region = json_object_get_string(label);
+                if (region)
+                    newPhoneRegion = region;
             }
         }
 
-        newLocale = languageCode;
+        // either code may be NULL (key missing or JSON null); assigning a NULL
+        // char* to std::string is undefined behavior
+        if (languageCode)
+            newLocale = languageCode;
         newLocale += "_";
-        newLocale += countryCode;
+        if (countryCode)
+            newLocale += countryCode;
 
         if ((newLocale != prefObjPtr->m_locale && newLocale != "_") ||
             (!newPhoneRegion.empty() && newPhoneRegion != prefObjPtr->m_phoneRegion )) {
@@ -516,8 +518,11 @@ bool LocalePreferences::getPreferencesCallback(LSHandle *sh, LSMessage *message,
     if (value) {
 
         label = json_object_object_get(value, "countryCode");
-        if (label)
-            newLocaleRegion = json_object_get_string(label);
+        if (label) {
+            const char* region = json_object_get_string(label);
+            if (region)
+                newLocaleRegion = region;
+        }
 
         if (!newLocaleRegion.empty() && newLocaleRegion != prefObjPtr->m_localeRegion) {
 
@@ -539,10 +544,13 @@ bool LocalePreferences::getPreferencesCallback(LSHandle *sh, LSMessage *message,
     }
     label = json_object_object_get(json, "timeFormat");
     if (label) {
-        if (prefObjPtr) {
-            MutexLocker locker(&prefObjPtr->m_mutex);
-            prefObjPtr->m_currentTimeFormat = json_object_get_string(label);
-            Q_EMIT prefObjPtr->signalTimeFormatChanged(prefObjPtr->m_currentTimeFormat.c_str());
+        const char* timeFormat = json_object_get_string(label);
+        if (prefObjPtr && timeFormat) {
+            {
+                MutexLocker locker(&prefObjPtr->m_mutex);
+                prefObjPtr->m_currentTimeFormat = timeFormat;
+            }
+            Q_EMIT prefObjPtr->signalTimeFormatChanged(timeFormat);
         }
     }
 Done:
@@ -592,13 +600,15 @@ bool LocalePreferences::getLocaleInfoCallback(LSHandle *sh,
 
     localesObj = json_object_object_get(localeInfoObj, kLocaleInfo_Locales);
 
-    if (!localesObj) {
+    if (!localesObj || !json_object_is_type(localesObj, json_type_object)) {
         goto Done;
     }
 
     {
         json_object_object_foreach(localesObj, keyName, valueName) {
-            newLocales.insert(keyName, json_object_get_string(valueName));
+            const char* localeValue = json_object_get_string(valueName);
+            if (localeValue)
+                newLocales.insert(keyName, localeValue);
         }
     }
 

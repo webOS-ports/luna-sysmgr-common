@@ -35,7 +35,7 @@
 #include "MutexLocker.h"
 #include "Settings.h"
 
-static GStaticMutex s_mutex       = G_STATIC_MUTEX_INIT;
+static GMutex s_mutex;
 static bool         s_initialized = false;
 static GHashTable*  s_channelHash = 0;
 
@@ -65,7 +65,7 @@ bool LunaChannelEnabled(const char* channel)
 
 	bool ret = false;
 	
-	g_static_mutex_lock(&s_mutex);
+	g_mutex_lock(&s_mutex);
 		
 	if (!s_initialized) {
 
@@ -97,7 +97,7 @@ bool LunaChannelEnabled(const char* channel)
 
  Done:	
 
-	g_static_mutex_unlock(&s_mutex);
+	g_mutex_unlock(&s_mutex);
 
 	return ret;
 }
@@ -177,7 +177,7 @@ LogIndent::~LogIndent()
 
 static const char * logLevelName(GLogLevelFlags logLevel)
 {
-	const char * name = "unknown";
+	const char * name;
 	switch (logLevel & G_LOG_LEVEL_MASK) {
 		 case G_LOG_LEVEL_ERROR:
 			 name = "ERROR";
@@ -214,7 +214,7 @@ static gpointer PrvLogThread(gpointer arg)
 		GLogLevelFlags logLevel;
 		gchar* message;
 
-		logLevel = *((GLogLevelFlags*)buf);
+		logLevel = *(reinterpret_cast<GLogLevelFlags*>(buf));
 		message = buf + sizeof(logLevel);
 
 		luna_syslog(syslogContextGlobal(), logLevel, message);
@@ -228,7 +228,7 @@ static gpointer PrvLogThread(gpointer arg)
 static void PrvCreateLogThread()
 {
 	sLogAsyncQueue = g_async_queue_new();
-	sLogThread = g_thread_create(PrvLogThread, 0, false, NULL);
+	sLogThread = g_thread_new("Logging", PrvLogThread, NULL);
 }
 
 static void PrvLogAtForkPrepare()
@@ -271,7 +271,9 @@ void logFilter(const gchar *log_domain, GLogLevelFlags logLevel, const gchar *me
 				int msgSize = strlen(message) + 1;
 				int bufSize = sizeof(logLevel) + msgSize;
 				char* buffer = (char*) malloc(bufSize);
-				*((GLogLevelFlags*)buffer) = logLevel;
+				if (!buffer)
+					return;
+				*(reinterpret_cast<GLogLevelFlags*>(buffer)) = logLevel;
 				memcpy(buffer + sizeof(logLevel), message, msgSize);
 
 				g_async_queue_push(sLogAsyncQueue, buffer);
@@ -288,8 +290,8 @@ void logFilter(const gchar *log_domain, GLogLevelFlags logLevel, const gchar *me
 	{
 		MutexLocker					lock(&slogFilter_mutex);	// race protection only needed for terminal and file logging
 
-		static struct timespec		sLogStartSeconds = { 0 };
-		static struct tm			sLogStartTime = { 0 };
+		static struct timespec		sLogStartSeconds = {};
+		static struct tm			sLogStartTime = {};
 		const char *				indent = sLogIndent.c_str();	// we own slogFilter_mutex, so we're ok cache this value while we do
 		if (sLogStartSeconds.tv_sec == 0 && sLogStartSeconds.tv_nsec == 0)
 		{
@@ -297,7 +299,8 @@ void logFilter(const gchar *log_domain, GLogLevelFlags logLevel, const gchar *me
 			::clock_gettime(CLOCK_MONOTONIC, &sLogStartSeconds);
 			::localtime_r(&now, &sLogStartTime);
 			char startTime[64];
-			::asctime_r(&sLogStartTime, startTime);
+			if (::strftime(startTime, sizeof(startTime), "%a %b %e %H:%M:%S %Y\n", &sLogStartTime) == 0)
+				startTime[0] = 0;
 			::fprintf(stdout, "Sysmgr starting at %s", startTime);
 		}
 		struct timespec now;
@@ -441,7 +444,7 @@ static void log_and_filter(GLogLevelFlags logLevel, const char * name, const cha
 	struct timespec	now;
 	::clock_gettime(CLOCK_MONOTONIC, &now);
 	const int cMaxLogAll = 20;
-	const __time_t cMaxGap = 60 * 5; // 5 minutes
+	const __time_t cMaxGap = 60L * 5L; // 5 minutes
 	if (++details.mCount < cMaxLogAll)
 	{
 		g_log(G_LOG_DOMAIN, logLevel, "%s: \"%s\" %sin %s:%d, in %s()", name, error, description, file, line, function);

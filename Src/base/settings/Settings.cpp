@@ -302,7 +302,7 @@ Settings::~Settings()
 	gchar* _vs;\
 	GError* _error = 0;\
 	_vs=g_key_file_get_string(keyfile,cat,name,&_error);\
-	if( !_error && _vs ) { var=(const char*)_vs; g_free(_vs); allSettings->insert(name, QString::fromStdString(var)); }\
+	if( !_error && _vs ) { (var)=(const char*)_vs; g_free(_vs); allSettings->insert((name), QString::fromStdString((var))); }\
 	else g_error_free(_error); \
 }
 
@@ -311,7 +311,7 @@ Settings::~Settings()
 	gchar* _vs;\
 	GError* _error = 0;\
 	_vs=g_key_file_get_string(keyfile,cat,name,&_error);\
-	if( !_error && _vs ) { var=::MemStringToBytes((const char*)_vs); g_free(_vs); allSettings->insert(name, QString::fromStdString(var)); }\
+	if( !_error && _vs ) { (var)=::MemStringToBytes((const char*)_vs); g_free(_vs); allSettings->insert((name), QString::number((qulonglong)(var))); }\
 	else g_error_free(_error); \
 }
 
@@ -320,7 +320,7 @@ Settings::~Settings()
 	gboolean _vb;\
 	GError* _error = 0;\
 	_vb=g_key_file_get_boolean(keyfile,cat,name,&_error);\
-	if( !_error ) { var=_vb; allSettings->insert(name, var); }\
+	if( !_error ) { (var)=_vb; allSettings->insert((name), (var)); }\
 	else g_error_free(_error); \
 }
 
@@ -329,7 +329,7 @@ Settings::~Settings()
 	int _v;\
 	GError* _error = 0;\
 	_v=g_key_file_get_integer(keyfile,cat,name,&_error);\
-	if( !_error ) { var=_v; allSettings->insert(name, var); }\
+	if( !_error ) { (var)=_v; allSettings->insert((name), (var)); }\
 	else g_error_free(_error); \
 }
 
@@ -338,7 +338,7 @@ Settings::~Settings()
 	double _v;\
 	GError* _error = 0;\
 	_v=g_key_file_get_double(keyfile,cat,name,&_error);\
-	if( !_error ) { var=_v; allSettings->insert(name, var); }\
+	if( !_error ) { (var)=_v; allSettings->insert((name), (var)); }\
 	else g_error_free(_error); \
 }
 
@@ -759,6 +759,11 @@ void Settings::postLoad()
 	SETTINGS_TRACE("\n");
 
 	//reset the lunaAppsPath (LEGACY compatibility)
+	if (lunaAppsPaths.empty()) {
+		// an empty or delimiter-only ApplicationPath would otherwise abort on at(0)
+		g_warning("Settings::load(): no valid application paths configured, keeping default '%s'", lunaAppsPath.c_str());
+		lunaAppsPaths.push_back(lunaAppsPath);
+	}
 	lunaAppsPath = lunaAppsPaths.at(0);
 
 	createNeededFolders();
@@ -790,17 +795,22 @@ unsigned long MemStringToBytes( const char* ptr )
 	while( isdigit(*ptr) )
 		ptr++;
 
-	strncpy( number, s, (size_t)(ptr-s) );
-	number[ptr-s]=0;
+	size_t digits = (size_t)(ptr-s);
+	if (digits >= sizeof(number))
+		digits = sizeof(number) - 1;
+	strncpy( number, s, digits );
+	number[digits]=0;
 
 	r = (unsigned long)atol(number);
 	switch(*ptr)
 	{
 	case 'M':
-		r *= 1024 * 1024; break;
+		r *= 1024UL * 1024UL; break;
 	case 'k':
 	case 'K':
 		r *= 1024 ; break;
+	default:
+		break;
 	}
 
 	return r;

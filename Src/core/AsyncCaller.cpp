@@ -36,15 +36,15 @@ AsyncCallerBase::AsyncCallerBase(GMainLoop* loop, gint sourcePriority)
 	// setup an iochannel on the read end of the pipe
 	m_ioChannel =  g_io_channel_unix_new(m_pipeFd[0]);
 	m_ioSource = g_io_create_watch(m_ioChannel, (GIOCondition) G_IO_IN);
-	g_source_set_callback(m_ioSource, (GSourceFunc) callback, this, NULL);
+	g_source_set_callback(m_ioSource, G_SOURCE_FUNC(callback), this, NULL);
 	g_source_set_can_recurse(m_ioSource, true);
 	g_source_set_priority(m_ioSource, sourcePriority);
 
 	GMainContext* ctxt = g_main_loop_get_context(loop);
 	g_source_attach(m_ioSource, ctxt);
 
-	m_mutex = g_new0(GStaticRecMutex, 1);
-	g_static_rec_mutex_init(m_mutex);
+	m_mutex = g_new0(GRecMutex, 1);
+	g_rec_mutex_init(m_mutex);
 }
 
 AsyncCallerBase::~AsyncCallerBase()
@@ -56,7 +56,7 @@ AsyncCallerBase::~AsyncCallerBase()
     ::close(m_pipeFd[0]);
 	::close(m_pipeFd[1]);
 
-	g_static_rec_mutex_free(m_mutex);
+	g_rec_mutex_clear(m_mutex);
 	g_free(m_mutex);
 }
 
@@ -64,10 +64,10 @@ void AsyncCallerBase::call()
 {	
 	char byte = 1;
 
-	g_static_rec_mutex_lock(m_mutex);
+	g_rec_mutex_lock(m_mutex);
 	ssize_t result = ::write(m_pipeFd[1], &byte, 1);
 	(void)result;
-	g_static_rec_mutex_unlock(m_mutex);
+	g_rec_mutex_unlock(m_mutex);
 }
 
 gboolean AsyncCallerBase::callback(GIOChannel* channel, GIOCondition condition, gpointer arg)

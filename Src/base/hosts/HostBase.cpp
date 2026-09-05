@@ -47,9 +47,8 @@ bool HostBase::hostIsQemu() {
 
 	char* line = 0;
 	size_t lineLen = 0;
-	ssize_t readLen;
 
-	while ((readLen = ::getline(&line, &lineLen, f)) != -1) {
+	while (::getline(&line, &lineLen, f) != -1) {
 		if (strstr(line, "ARM-Versatile") != 0) {
 			isQemu = true;
 			printf("Host Platform is QEMU\n");
@@ -97,7 +96,9 @@ HostBase::HostBase()
 
 HostBase::~HostBase()
 {
-	quit();
+	// explicitly qualified: virtual dispatch is already gone during
+	// destruction, so an unqualified call could never reach an override
+	HostBase::quit();
 
 	g_main_loop_unref(m_mainLoop);
 	g_main_context_unref(m_mainCtxt);

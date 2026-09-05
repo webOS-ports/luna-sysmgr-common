@@ -39,13 +39,13 @@ static const int kTouchableHeight = 48;
 
 DeviceInfo* DeviceInfo::instance()
 {
-	if (G_UNLIKELY(s_instance == 0))
-		new DeviceInfo;
-
-	return s_instance;
+	// function-local static: thread-safe one-time construction (C++11)
+	static DeviceInfo* inst = new DeviceInfo;
+	return inst;
 }
 
 DeviceInfo::DeviceInfo()
+	: m_radioType(0)
 {
 	s_instance = this;
 
@@ -57,7 +57,7 @@ DeviceInfo::~DeviceInfo()
     s_instance = 0;
 }
 
-std::string DeviceInfo::jsonString() const
+const std::string& DeviceInfo::jsonString() const
 {
     return m_jsonString;
 }
@@ -69,7 +69,7 @@ static bool getLunaPrefSystemValue(const char* key, std::string& value)
 	char* str = 0;
 	if (LP_ERR_NONE == LPSystemCopyStringValue(key, &str) && str) {
 		value = str;
-		g_free((gchar*) str);
+		g_free(str);
 		return true;
 	}
 #endif
@@ -200,15 +200,15 @@ void DeviceInfo::gatherInfo()
             m_keyboardType = "QWERTY";
             m_swappableBattery = false;
         } else {
-            if (!getLunaPrefSystemValue("com.palm.properties.deviceNameShortBranded", m_modelName))
-                m_modelName = "webOS smartphone";
+		if (!getLunaPrefSystemValue("com.palm.properties.deviceNameShortBranded", m_modelName))
+			m_modelName = "webOS smartphone";
 
 		if (!getLunaPrefSystemValue("com.palm.properties.deviceNameShort", m_modelNameAscii))
 			m_modelNameAscii = "webOS smartphone";
-		
+
 		m_keyboardSlider = false;
 		m_coreNaviButton = false;
-        m_keyboardAvailable = false;
+		m_keyboardAvailable = false;
 		m_swappableBattery = false;
 
 		// Castle

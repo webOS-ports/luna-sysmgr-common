@@ -125,10 +125,10 @@ public:
 	}
 
 	static uint16_t modifiersFromQt(const Qt::KeyboardModifiers& m) {
-		return (m & Qt::ShiftModifier ? Event::Shift : 0) |
-			(m & Qt::ControlModifier ? Event::Control : 0) |
-			(m & Qt::AltModifier ? Event::Alt : 0) |
-			(m & Qt::MetaModifier ? Event::Meta : 0);
+		return ((m & Qt::ShiftModifier) ? Event::Shift : 0) |
+			((m & Qt::ControlModifier) ? Event::Control : 0) |
+			((m & Qt::AltModifier) ? Event::Alt : 0) |
+			((m & Qt::MetaModifier) ? Event::Meta : 0);
 	}
 	
 private:

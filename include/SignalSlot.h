@@ -25,6 +25,7 @@
 #include "Common.h"
 
 #include <set>
+#include <vector>
 #include <stdio.h>
 
 class Trackable;
@@ -81,6 +82,7 @@ class SlotBase
 {
 public:
 
+	virtual ~SlotBase() {}
 	virtual void fire(Arg0 arg0, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4) = 0;
 };
 
@@ -89,6 +91,7 @@ class SlotBase<void, void, void, void, void>
 {
 public:
 	
+	virtual ~SlotBase() {}
 	virtual void fire() = 0;
 };
 
@@ -97,6 +100,7 @@ class SlotBase<Arg0, void, void, void, void>
 {
 public:
 	
+	virtual ~SlotBase() {}
 	virtual void fire(Arg0 arg0) = 0;
 };
 
@@ -105,6 +109,7 @@ class SlotBase<Arg0, Arg1, void, void, void>
 {
 public:
 	
+	virtual ~SlotBase() {}
 	virtual void fire(Arg0 arg0, Arg1 arg1) = 0;
 };
 
@@ -113,6 +118,7 @@ class SlotBase<Arg0, Arg1, Arg2, void, void>
 {
 public:
 	
+	virtual ~SlotBase() {}
 	virtual void fire(Arg0 arg0, Arg1 arg1, Arg2 arg2) = 0;
 };
 
@@ -121,6 +127,7 @@ class SlotBase<Arg0, Arg1, Arg2, Arg3, void>
 {
 public:
 	
+	virtual ~SlotBase() {}
 	virtual void fire(Arg0 arg0, Arg1 arg1, Arg2 arg2, Arg3 arg3) = 0;
 };
 
@@ -297,13 +304,16 @@ public:
 
 	template <class Receiver>
 	void connect(Receiver* rec, void (Receiver::*func)(Arg0, Arg1, Arg2, Arg3, Arg4)) {
-		SignalBase<Arg0>::connect(rec, new Slot<Receiver, Arg0, Arg1, Arg2, Arg3, Arg4>(rec, func));
+		SignalBase<Arg0, Arg1, Arg2, Arg3, Arg4>::connect(rec, new Slot<Receiver, Arg0, Arg1, Arg2, Arg3, Arg4>(rec, func));
 	}
 
 	void fire(Arg0 arg0, Arg1 arg1, Arg2 arg2, Arg3 arg3, Arg4 arg4) {
-		typename std::set<SlotBase<Arg0, Arg1, Arg2, Arg3, Arg4>* >::iterator it = this->m_slots.begin();
-		while (it != this->m_slots.end()) {
-			(*it++)->fire(arg0, arg1, arg2, arg3, arg4);
+		// fire over a snapshot: a handler may disconnect (and delete) other
+		// slots of this signal; skip slots removed while firing
+		std::vector<SlotBase<Arg0, Arg1, Arg2, Arg3, Arg4>*> slots(this->m_slots.begin(), this->m_slots.end());
+		for (typename std::vector<SlotBase<Arg0, Arg1, Arg2, Arg3, Arg4>*>::iterator it = slots.begin(); it != slots.end(); ++it) {
+			if (this->m_slots.find(*it) != this->m_slots.end())
+				(*it)->fire(arg0, arg1, arg2, arg3, arg4);
 		}
 	}
 };
@@ -320,9 +330,12 @@ public:
 	}
 		
 	void fire() {
-		std::set<SlotBase<>* >::iterator it = this->m_slots.begin();
-		while (it != this->m_slots.end()) {
-			(*it++)->fire();
+		// fire over a snapshot: a handler may disconnect (and delete) other
+		// slots of this signal; skip slots removed while firing
+		std::vector<SlotBase<>*> slots(this->m_slots.begin(), this->m_slots.end());
+		for (std::vector<SlotBase<>*>::iterator it = slots.begin(); it != slots.end(); ++it) {
+			if (this->m_slots.find(*it) != this->m_slots.end())
+				(*it)->fire();
 		}
 	}
 };
@@ -338,9 +351,12 @@ public:
 	}
 
 	void fire(Arg0 arg0) {
-		typename std::set<SlotBase<Arg0>* >::iterator it = this->m_slots.begin();
-		while (it != this->m_slots.end()) {
-			(*it++)->fire(arg0);
+		// fire over a snapshot: a handler may disconnect (and delete) other
+		// slots of this signal; skip slots removed while firing
+		std::vector<SlotBase<Arg0>*> slots(this->m_slots.begin(), this->m_slots.end());
+		for (typename std::vector<SlotBase<Arg0>*>::iterator it = slots.begin(); it != slots.end(); ++it) {
+			if (this->m_slots.find(*it) != this->m_slots.end())
+				(*it)->fire(arg0);
 		}
 	}
 };
@@ -356,9 +372,12 @@ public:
 	}
 
 	void fire(Arg0 arg0, Arg1 arg1) {
-		typename std::set<SlotBase<Arg0, Arg1>* >::iterator it = this->m_slots.begin();
-		while (it != this->m_slots.end()) {
-			(*it++)->fire(arg0, arg1);
+		// fire over a snapshot: a handler may disconnect (and delete) other
+		// slots of this signal; skip slots removed while firing
+		std::vector<SlotBase<Arg0, Arg1>*> slots(this->m_slots.begin(), this->m_slots.end());
+		for (typename std::vector<SlotBase<Arg0, Arg1>*>::iterator it = slots.begin(); it != slots.end(); ++it) {
+			if (this->m_slots.find(*it) != this->m_slots.end())
+				(*it)->fire(arg0, arg1);
 		}
 	}
 };
@@ -374,9 +393,12 @@ public:
 	}
 
 	void fire(Arg0 arg0, Arg1 arg1, Arg2 arg2) {
-		typename std::set<SlotBase<Arg0, Arg1, Arg2>* >::iterator it = this->m_slots.begin();
-		while (it != this->m_slots.end()) {
-			(*it++)->fire(arg0, arg1, arg2);
+		// fire over a snapshot: a handler may disconnect (and delete) other
+		// slots of this signal; skip slots removed while firing
+		std::vector<SlotBase<Arg0, Arg1, Arg2>*> slots(this->m_slots.begin(), this->m_slots.end());
+		for (typename std::vector<SlotBase<Arg0, Arg1, Arg2>*>::iterator it = slots.begin(); it != slots.end(); ++it) {
+			if (this->m_slots.find(*it) != this->m_slots.end())
+				(*it)->fire(arg0, arg1, arg2);
 		}
 	}
 };
@@ -392,9 +414,12 @@ public:
 	}
 
 	void fire(Arg0 arg0, Arg1 arg1, Arg2 arg2, Arg3 arg3) {
-		typename std::set<SlotBase<Arg0, Arg1, Arg2, Arg3>* >::iterator it = this->m_slots.begin();
-		while (it != this->m_slots.end()) {
-			(*it++)->fire(arg0, arg1, arg2, arg3);
+		// fire over a snapshot: a handler may disconnect (and delete) other
+		// slots of this signal; skip slots removed while firing
+		std::vector<SlotBase<Arg0, Arg1, Arg2, Arg3>*> slots(this->m_slots.begin(), this->m_slots.end());
+		for (typename std::vector<SlotBase<Arg0, Arg1, Arg2, Arg3>*>::iterator it = slots.begin(); it != slots.end(); ++it) {
+			if (this->m_slots.find(*it) != this->m_slots.end())
+				(*it)->fire(arg0, arg1, arg2, arg3);
 		}
 	}
 };

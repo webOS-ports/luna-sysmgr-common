@@ -45,7 +45,9 @@ SyncTask::SyncTask(GMainContext* ctxt)
 
 SyncTask::~SyncTask()
 {
-    quit();
+    // explicitly qualified: virtual dispatch is already gone during
+    // destruction, so an unqualified call could never reach an override
+    SyncTask::quit();
 
     if(destroyMainLoop) {
 		delete m_masterTimer;

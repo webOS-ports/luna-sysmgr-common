@@ -33,19 +33,19 @@ AnimationSettings* AnimationSettings::s_instance = 0;
 	{															\
 		int _v;													\
 		GError* _error = 0;										\
-		_v=g_key_file_get_integer(keyFile,cat,#var,&_error);	\
-		if( !_error ) { var=_v; }								\
+		_v=g_key_file_get_integer(keyFile,(cat),#var,&_error);	\
+		if( !_error ) { (var)=_v; }								\
 		else { g_error_free(_error); }							\
 																\
-		m_values[#var] = &var;									\
+		m_values[#var] = &(var);								\
 	}
 
 AnimationSettings::AnimationSettings()
 	: normalFPS(35), slowFPS(20)
 	, cardLaunchDuration(400), cardLaunchCurve(40)
 	, cardSlideDuration(300), cardSlideCurve(10)
-	, cardTrackGroupDuration(300), cardTrackGroupCurve(0)
-	, cardTrackDuration(300), cardTrackCurve(10)
+	, cardTrackGroupCurve(0), cardTrackGroupDuration(300)
+	, cardTrackCurve(10), cardTrackDuration(300)
 	, cardMaximizeDuration(300), cardMaximizeCurve(10)
 	, cardMinimizeDuration(350), cardMinimizeCurve(10)
 	, cardDeleteDuration(300), cardDeleteCurve(6)

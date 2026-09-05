@@ -26,6 +26,7 @@
 #include "Localization.h"
 
 #include "LocalePreferences.h"
+#include "MutexLocker.h"
 #include "Settings.h"
 
 #include <QVector>
@@ -36,12 +37,8 @@ static const char* s_localeFile = "/strings.json";
 
 Localization* Localization::instance()
 {
-	// Not thread-safe. Make sure to initialize this in the Main before spawning
-	// other threads
-	static Localization* s_instance = 0;
-	if (G_UNLIKELY(s_instance == 0))
-		s_instance = new Localization;
-
+	// function-local static: thread-safe one-time construction (C++11)
+	static Localization* s_instance = new Localization;
 	return s_instance;
 }
 
@@ -56,7 +53,9 @@ Localization::~Localization()
 
 void Localization::loadLocalizedStrings()
 {
-	m_localizationMap.clear();
+	// build into a local map and swap under the lock so concurrent
+	// getLocalizedString() calls never observe a half-built table
+	LocalizationMap newMap;
 
 	QVector<std::string> translations;
 
@@ -85,14 +84,18 @@ void Localization::loadLocalizedStrings()
 			std::string key = pair.first.asString();
 			std::string value = pair.second.asString();
 
-			if (!m_localizationMap.contains(key))
-				m_localizationMap.insert(key, value);
+			if (!newMap.contains(key))
+				newMap.insert(key, value);
 		}
 	}
+
+	MutexLocker locker(&m_mutex);
+	m_localizationMap = newMap;
 }
 
 std::string Localization::getLocalizedString(const std::string& str) const
 {
+	MutexLocker locker(&m_mutex);
 	LocalizationMap::const_iterator it = m_localizationMap.find(str);
 	if (G_UNLIKELY(it == m_localizationMap.end()))
 		return str;

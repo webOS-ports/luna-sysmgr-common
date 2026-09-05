@@ -33,7 +33,7 @@ public:
 	static DeviceInfo* instance();
 	~DeviceInfo();
 
-	std::string jsonString() const;
+	const std::string& jsonString() const;
 
 	bool keyboardSlider() const;
 	bool coreNaviButton() const;

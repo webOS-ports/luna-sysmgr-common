@@ -25,6 +25,7 @@
 #include "Common.h"
 
 #include "QtUtils.h"
+#include "Mutex.h"
 #include <QHash>
 
 class Localization
@@ -46,6 +47,9 @@ private:
 private:
 	typedef QHash<std::string, std::string> LocalizationMap;
 	LocalizationMap m_localizationMap;
+	// guards m_localizationMap: loadLocalizedStrings() rebuilds it at runtime
+	// on locale changes while other threads may be reading translations
+	mutable Mutex m_mutex;
 };
 
 std::string LOCALIZED(const std::string& str);

@@ -31,6 +31,7 @@ public:
     static const char* strMagneticField()               { return "magneticField"; }
     static const char* strScreenProximity()             { return "screenProximity"; }
     static const char* strRotation()                    { return "rotation"; }
+    static const char* strLogicalAccelerometer()        { return "logicalAccelerometer"; }
     static const char* strLogicalDeviceMotion()         { return "logicalDeviceMotion"; }
     static const char* strLogicalDeviceOrientation()    { return "logicalDeviceOrientation"; }
 };
@@ -44,12 +45,12 @@ public:
     static const char* strX()                       { return "x"; }
     static const char* strY()                       { return "y"; }
     static const char* strZ()                       { return "z"; }
-    static const char* strRawX()                    { return "rowX"; }
-    static const char* strRawY()                    { return "rowY"; }
-    static const char* strRawZ()                    { return "rowZ"; }
+    static const char* strRawX()                    { return "rawX"; }
+    static const char* strRawY()                    { return "rawY"; }
+    static const char* strRawZ()                    { return "rawZ"; }
     static const char* strWorldX()                  { return "worldX"; }
     static const char* strWorldY()                  { return "worldY"; }
-    static const char* strWorldZ()                  { return "worldX"; }
+    static const char* strWorldZ()                  { return "worldZ"; }
     static const char* strPosition()                { return "position"; }
     static const char* strShakeState()              { return "shakeState"; }
     static const char* strShakeMagnitude()          { return "shakeMagnitude"; }

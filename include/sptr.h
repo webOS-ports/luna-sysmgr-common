@@ -115,15 +115,19 @@ private:
 	{
 		if (ptr != m_ptr)
 		{
-			if (m_ptr)
+			// ref the incoming object before releasing the old one: the old
+			// object may be the only thing keeping the new one alive
+			if (ptr)
 			{
-				m_ptr->deref();
+				ptr->ref();
 			}
+
+			T* old = m_ptr;
 			m_ptr = ptr;
 
-			if (m_ptr)
+			if (old)
 			{
-				m_ptr->ref();
+				old->deref();
 			}
 		}
 	}

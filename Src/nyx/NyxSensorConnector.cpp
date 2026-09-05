@@ -30,9 +30,25 @@
 
 #define CHECK_ERROR(err, msg)                                                                               \
         do {                                                                                                \
-             if (NYX_ERROR_NONE != err)                                                                  \
+             if (NYX_ERROR_NONE != (err))                                                                   \
              {                                                                                              \
-               g_critical("[%s : %d] : %s : Error Code -> [%d]", __PRETTY_FUNCTION__, __LINE__, msg, err);  \
+               g_critical("[%s : %d] : %s : Error Code -> [%d]", __PRETTY_FUNCTION__, __LINE__, msg, (err)); \
+               return;                                                                                      \
+             }                                                                                              \
+           } while(0)
+
+/**
+  * Variant for use inside the readSensorData loops after an event handle has
+  * been acquired: releases the event before bailing out so the nyx event
+  * doesn't leak on the error path.
+  */
+#define CHECK_ERROR_RELEASE_EVENT(err, msg)                                                                 \
+        do {                                                                                                \
+             if (NYX_ERROR_NONE != (err))                                                                   \
+             {                                                                                              \
+               g_critical("[%s : %d] : %s : Error Code -> [%d]", __PRETTY_FUNCTION__, __LINE__, msg, (err)); \
+               if (eventHandle)                                                                             \
+                   SAFE_NYX_CALL(nyx_device_release_event(m_Handle, eventHandle));                          \
                return;                                                                                      \
              }                                                                                              \
            } while(0)
@@ -59,7 +75,6 @@ static gboolean deleteCallback(gpointer apObject)
     {
         NYXConnectorBase* pObj = (NYXConnectorBase*)apObject;
         delete pObj;
-        apObject = 0;
     }
     return false;
 }
@@ -339,6 +354,8 @@ static void InitSensorMap()
         sSensorMap.insert(NYXConnectorBase::SensorRotation,             QString(SensorNames::strRotation()));
         sSensorMap.insert(NYXConnectorBase::SensorLogicalOrientation,   QString(SensorNames::strLogicalDeviceOrientation()));
         sSensorMap.insert(NYXConnectorBase::SensorLogicalMotion,        QString(SensorNames::strLogicalDeviceMotion()));
+        sSensorMap.insert(NYXConnectorBase::SensorLogicalAccelerometer, QString(SensorNames::strLogicalAccelerometer()));
+        sSensorMap.insert(NYXConnectorBase::SensorLogicalDeviceOrientation, QString(SensorNames::strLogicalDeviceOrientation()));
 
         sInitialized = true;
     }
@@ -547,7 +564,7 @@ void NYXAccelerationSensorConnector::readSensorData(int )
     while ((!m_Finished) && (NYX_ERROR_NONE == nError) && (eventHandle) && (m_Handle))
     {
         nError = nyx_sensor_acceleration_event_get_item(eventHandle, &m_AccelerationData);
-        CHECK_ERROR(nError, "Unable to obtain Acceleration event items");
+        CHECK_ERROR_RELEASE_EVENT(nError, "Unable to obtain Acceleration event items");
 
         SAFE_NYX_CALL(nError = nyx_device_release_event(m_Handle, eventHandle));
         CHECK_ERROR(nError, "Unable to release Acceleration event");
@@ -1008,7 +1025,7 @@ void NYXOrientationSensorConnector::readSensorData(int )
     {
         nyx_sensor_orientation_event_item_t orientationData;
         nError = nyx_sensor_orientation_event_get_item(eventHandle, &orientationData);
-        CHECK_ERROR((nError != NYX_ERROR_NONE), "Unable to obtain Orientation event items");
+        CHECK_ERROR_RELEASE_EVENT(nError, "Unable to obtain Orientation event items");
 
         m_Orientation = mapAccelerometerOrientation(orientationData.value);
 
@@ -1363,7 +1380,7 @@ void NYXShakeSensorConnector::readSensorData(int )
     {
         nyx_sensor_shake_event_item_t   shakeData;
         nError = nyx_sensor_shake_event_get_item(eventHandle, &shakeData);
-        CHECK_ERROR((nError != NYX_ERROR_NONE), "Unable to obtain Shake Handle event items");
+        CHECK_ERROR_RELEASE_EVENT(nError, "Unable to obtain Shake Handle event items");
 
         SAFE_NYX_CALL(nError = nyx_device_release_event(m_Handle, eventHandle));
         CHECK_ERROR(nError, "Unable to release Shake event");
@@ -1452,6 +1469,14 @@ NYXLogicalSensorConnectorBase::NYXLogicalSensorConnectorBase(Sensor aSensorType,
 
 NYXLogicalSensorConnectorBase::~NYXLogicalSensorConnectorBase()
 {
+    // delete the child sensors: a direct delete (rather than
+    // scheduleDeletion()) would otherwise leak them and their nyx handles
+    std::vector<NYXConnectorBase *>::iterator it;
+    for (it = m_SensorList.begin(); it != m_SensorList.end(); ++it)
+    {
+        delete *it;
+    }
+    m_SensorList.clear();
 }
 
 bool NYXLogicalSensorConnectorBase::on()
@@ -1542,6 +1567,10 @@ void NYXLogicalSensorConnectorBase::scheduleDeletion()
             pSensor->scheduleDeletion();
         }
     }
+
+    // ownership of the children now rests with their scheduled delete
+    // callbacks; clear the list so our destructor doesn't delete them again
+    m_SensorList.clear();
 }
 
 void NYXLogicalSensorConnectorBase::logicalSensorDataAvailable()
@@ -1555,7 +1584,6 @@ void NYXLogicalSensorConnectorBase::logicalSensorDataAvailable()
 json_object* NYXLogicalSensorConnectorBase::toJSONObject()
 {
     NYXConnectorBase   *pSensor         = 0;
-    std::string         strJson         = "";
 
     std::vector<NYXConnectorBase *>::iterator it;
 
@@ -1828,7 +1856,7 @@ NYXLogicalDeviceMotionSensorConnector::NYXLogicalDeviceMotionSensorConnector(NYX
  *  - Rotation
  */
 NYXLogicalDeviceOrientationSensorConnector::NYXLogicalDeviceOrientationSensorConnector(NYXConnectorObserver *aObserver, bool bCanPostEvent)
-    : NYXLogicalSensorConnectorBase(SensorLogicalOrientation, aObserver, bCanPostEvent)
+    : NYXLogicalSensorConnectorBase(SensorLogicalDeviceOrientation, aObserver, bCanPostEvent)
 {
     NYXConnectorBase *pSensor = NYXConnectorBase::getSensor(SensorRotation, 0, false);
     if (pSensor)
