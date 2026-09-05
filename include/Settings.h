@@ -303,8 +303,9 @@ public:
 		if (G_LIKELY(s_settings))
 			return s_settings;
 
-		s_settings = new Settings();
-		return s_settings;
+		// function-local static: thread-safe one-time construction (C++11)
+		static Settings* inst = (s_settings = new Settings());
+		return inst;
 	}
 
 

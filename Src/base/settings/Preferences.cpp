@@ -37,9 +37,6 @@
 #include <QLocale>
 #include "Localization.h"
 
-static const char* s_defaultLocale = "en_us";
-static const char* s_defaultLocaleRegion = "us";
-static const char* s_defaultPhoneRegion = "us";
 static const char* s_prefsDbPath = "/var/luna/preferences/systemprefs.db";
 
 static const char* s_logChannel = "Preferences";
@@ -50,10 +47,8 @@ extern "C" void setAdvancedGestures(int);
 
 Preferences* Preferences::instance()
 {
-	static Preferences* s_prefs = 0;
-	if (!s_prefs)
-		s_prefs = new Preferences();
-
+	// function-local static: thread-safe one-time construction (C++11)
+	static Preferences* s_prefs = new Preferences();
 	return s_prefs;
 }
 
@@ -63,12 +58,10 @@ Preferences::Preferences()
 	, m_playFeedbackSounds(true)
 	, m_sysUiNoHomeButtonMode(true)
 	, m_sysUiEnableNextPrevGestures(false)
-	, m_lockTimeout(0)
-	, m_lsHandle(0)
 	, m_imeEnabled(false)
 	, m_pinyinEnabled(false)
-	, m_pinyinPassthrough(false)
 	, m_hwrEnabled(false)
+	, m_pinyinPassthrough(false)
 	, m_roamingIndicator("")
 	, m_hideWANAlert(false)
 	, m_dualRSSI(false)
@@ -77,9 +70,11 @@ Preferences::Preferences()
 	, m_bluetoothOn(false)
 	, m_show3GForEvdo(false)
 	, m_enableVoiceDial(false)
+	, m_lockTimeout(0)
     , m_rotationLock(OrientationEvent::Orientation_Invalid)
 	, m_muteOn(false)
 	, m_enableALS(true)
+	, m_lsHandle(0)
 {
 	init();
 	registerService();
@@ -103,10 +98,13 @@ bool Preferences::airplaneMode() const
 
 bool Preferences::setAirplaneMode(bool on)
 {
-	m_airplaneMode = on;
+	{
+		MutexLocker locker(&m_mutex);
+		m_airplaneMode = on;
+	}
 
 	pbnjson::JValue pref = pbnjson::Object();
-	pref.put("airplaneMode", m_airplaneMode);
+	pref.put("airplaneMode", on);
 
 	LSError error;
 	LSErrorInit(&error);
@@ -118,7 +116,7 @@ bool Preferences::setAirplaneMode(bool on)
 				 NULL, NULL, NULL, &error);
 	if (!ret) {
 		g_warning("%s: Failed setting 'airplaneMode' to '%d' (%s)",
-				   __FUNCTION__, m_airplaneMode, error.message);
+				   __FUNCTION__, on, error.message);
 		LSErrorFree(&error);
 		return false;
 	}
@@ -133,10 +131,13 @@ bool Preferences::wifiState() const
 
 bool Preferences::saveWifiState(bool on)
 {
-	m_wifiOn = on;
+	{
+		MutexLocker locker(&m_mutex);
+		m_wifiOn = on;
+	}
 
 	pbnjson::JValue pref = pbnjson::Object();
-	pref.put("wifiRadio", m_wifiOn);
+	pref.put("wifiRadio", on);
 
 	LSError error;
 	LSErrorInit(&error);
@@ -148,7 +149,7 @@ bool Preferences::saveWifiState(bool on)
 				 NULL, NULL, NULL, &error);
 	if (!ret) {
 		g_warning("%s: Failed setting 'wifiRadio' to '%d' (%s)",
-				   __FUNCTION__, m_wifiOn, error.message);
+				   __FUNCTION__, on, error.message);
 		LSErrorFree(&error);
 		return false;
 	}
@@ -163,10 +164,13 @@ bool Preferences::bluetoothState() const
 
 bool Preferences::saveBluetoothState(bool on)
 {
-	m_bluetoothOn = on;
+	{
+		MutexLocker locker(&m_mutex);
+		m_bluetoothOn = on;
+	}
 
 	pbnjson::JValue pref = pbnjson::Object();
-	pref.put("bluetoothRadio", m_bluetoothOn);
+	pref.put("bluetoothRadio", on);
 
 	LSError error;
 	LSErrorInit(&error);
@@ -178,7 +182,7 @@ bool Preferences::saveBluetoothState(bool on)
 				 NULL, NULL, NULL, &error);
 	if (!ret) {
 		g_warning("%s: Failed setting 'wifiRadio' to '%d' (%s)",
-				   __FUNCTION__, m_bluetoothOn, error.message);
+				   __FUNCTION__, on, error.message);
 		LSErrorFree(&error);
 		return false;
 	}
@@ -194,10 +198,13 @@ OrientationEvent::Orientation Preferences::rotationLock() const
 
 bool Preferences::setRotationLockPref(OrientationEvent::Orientation lockedOrientation)
 {
-	m_rotationLock = lockedOrientation;
+	{
+		MutexLocker locker(&m_mutex);
+		m_rotationLock = lockedOrientation;
+	}
 
 	pbnjson::JValue pref = pbnjson::Object();
-	pref.put("rotationLock", (int)m_rotationLock);
+	pref.put("rotationLock", (int)lockedOrientation);
 
 	LSError error;
 	LSErrorInit(&error);
@@ -209,7 +216,7 @@ bool Preferences::setRotationLockPref(OrientationEvent::Orientation lockedOrient
 				 NULL, NULL, NULL, &error);
 	if (!ret) {
 		g_warning("%s: Failed setting 'rotationLock' to '%d' (%s)",
-				   __FUNCTION__, m_rotationLock, error.message);
+				   __FUNCTION__, lockedOrientation, error.message);
 		LSErrorFree(&error);
 		return false;
 	}
@@ -230,10 +237,13 @@ bool Preferences::isAlsEnabled() const
 
 bool Preferences::setMuteSoundPref(bool mute)
 {
-	m_muteOn = mute;
+	{
+		MutexLocker locker(&m_mutex);
+		m_muteOn = mute;
+	}
 
 	pbnjson::JValue pref = pbnjson::Object();
-	pref.put("muteSound", m_muteOn);
+	pref.put("muteSound", mute);
 
 	LSError error;
 	LSErrorInit(&error);
@@ -245,7 +255,7 @@ bool Preferences::setMuteSoundPref(bool mute)
 				 NULL, NULL, NULL, &error);
 	if (!ret) {
 		g_warning("%s: Failed setting 'muteSound' to '%d' (%s)",
-				   __FUNCTION__, m_muteOn, error.message);
+				   __FUNCTION__, mute, error.message);
 		LSErrorFree(&error);
 		return false;
 	}
@@ -286,10 +296,11 @@ void Preferences::setLockTimeout(uint32_t timeout)
 
 		std::stringstream value;
 		value << timeout;
-		char* queryStr = sqlite3_mprintf("INSERT INTO Preferences VALUES (%Q, %Q)",
+		char* queryStr = sqlite3_mprintf("INSERT OR REPLACE INTO Preferences VALUES (%Q, %Q)",
 										 "lockTimeout", value.str().c_str());
 
-		sqlite3_exec(prefsDb, queryStr, NULL, NULL, NULL);
+		if (sqlite3_exec(prefsDb, queryStr, NULL, NULL, NULL) != SQLITE_OK)
+			g_warning("%s: Failed to persist lockTimeout", __FUNCTION__);
 		sqlite3_free(queryStr);
 
 		if (prefsDb)
@@ -305,10 +316,8 @@ void Preferences::init()
 	sqlite3* prefsDb = 0;
 	sqlite3_stmt* statement = 0;
 	const char* tail = 0;
-	json_object* label = 0;
 	json_object* json = 0;
-	json_object* subobj = 0;
-	
+
 	int ret = sqlite3_open(s_prefsDbPath, &prefsDb);
 	if (ret) {
 		luna_critical(s_logChannel, "Failed to open preferences db");
@@ -465,15 +474,6 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	json_object* label = 0;
 	json_object* root_label = 0;
 	json_object* json = 0;
-	json_object* value = 0;
-	json_object* subobject = 0;
-
-	const char* languageCode = 0;
-	const char* countryCode = 0;
-	const char* phoneRegion = 0;
-	std::string newLocale;
-	std::string newLocaleRegion;
-	std::string newPhoneRegion;
 
 	const char* imeType = 0;
 
@@ -497,7 +497,7 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 
         imeType = json_object_get_string(label);
 
-		if (prefObjPtr)
+		if (prefObjPtr && imeType)
         {
             if (!strcmp (imeType, "pinyin"))
             {
@@ -522,8 +522,11 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 		
 		label = json_object_object_get(root_label,"fullPath");
 		if (label) {
-			if (prefObjPtr)
-				prefObjPtr->m_currentRingtoneFile = json_object_get_string(label);
+			const char* path = json_object_get_string(label);
+			if (prefObjPtr && path) {
+				MutexLocker locker(&prefObjPtr->m_mutex);
+				prefObjPtr->m_currentRingtoneFile = path;
+			}
 		}
 	}
 	
@@ -532,8 +535,11 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 
 		label = json_object_object_get(root_label,"fullPath");
 		if (label) {
-			if (prefObjPtr)
-				prefObjPtr->m_currentAlerttoneFile = json_object_get_string(label);
+			const char* path = json_object_get_string(label);
+			if (prefObjPtr && path) {
+				MutexLocker locker(&prefObjPtr->m_mutex);
+				prefObjPtr->m_currentAlerttoneFile = path;
+			}
 		}
 	}
 
@@ -542,8 +548,11 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 
 		label = json_object_object_get(root_label,"fullPath");
 		if (label) {
-			if (prefObjPtr)
-				prefObjPtr->m_currentNotificationtoneFile = json_object_get_string(label);
+			const char* path = json_object_get_string(label);
+			if (prefObjPtr && path) {
+				MutexLocker locker(&prefObjPtr->m_mutex);
+				prefObjPtr->m_currentNotificationtoneFile = path;
+			}
 		}
 	}
 
@@ -552,8 +561,9 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 
 		label = json_object_object_get(label, "wallpaperFile");
 		if (label) {
-			if (prefObjPtr)
-				Q_EMIT prefObjPtr->signalWallPaperChanged(json_object_get_string(label));
+			const char* file = json_object_get_string(label);
+			if (prefObjPtr && file)
+				Q_EMIT prefObjPtr->signalWallPaperChanged(file);
 		}
 	}
 
@@ -562,8 +572,9 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 
 		label = json_object_object_get(label, "wallpaperFile");
 		if (label) {
-			if (prefObjPtr)
-				Q_EMIT prefObjPtr->signalDockModeWallPaperChanged(json_object_get_string(label));
+			const char* file = json_object_get_string(label);
+			if (prefObjPtr && file)
+				Q_EMIT prefObjPtr->signalDockModeWallPaperChanged(file);
 		}
 	}
 
@@ -610,8 +621,12 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	if (label && json_object_is_type(label, json_type_int)) {
 
 		if (prefObjPtr) {
-			prefObjPtr->m_lockTimeout = json_object_get_int(label);
-			Q_EMIT prefObjPtr->signalSetLockTimeout(prefObjPtr->m_lockTimeout);
+			uint32_t timeout = json_object_get_int(label);
+			{
+				MutexLocker locker(&prefObjPtr->m_mutex);
+				prefObjPtr->m_lockTimeout = timeout;
+			}
+			Q_EMIT prefObjPtr->signalSetLockTimeout(timeout);
 		}
 	}
 
@@ -635,21 +650,28 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 
 	label = json_object_object_get(json, "roamingIndicator");
 	if (label) {
-		if (prefObjPtr) {
-			prefObjPtr->m_roamingIndicator = json_object_get_string(label);
-			Q_EMIT prefObjPtr->signalRoamingIndicatorChanged();
-			if(prefObjPtr->m_roamingIndicator == "triangle") {
-				prefObjPtr->m_show3GForEvdo = true;
+		const char* indicator = json_object_get_string(label);
+		if (prefObjPtr && indicator) {
+			{
+				MutexLocker locker(&prefObjPtr->m_mutex);
+				prefObjPtr->m_roamingIndicator = indicator;
+				if (prefObjPtr->m_roamingIndicator == "triangle") {
+					prefObjPtr->m_show3GForEvdo = true;
+				}
 			}
+			Q_EMIT prefObjPtr->signalRoamingIndicatorChanged();
 		}
 	}
 
 	label = json_object_object_get(json, "airplaneMode");
 	if (label && json_object_is_type(label, json_type_boolean)) {
 		if (prefObjPtr) {
-			MutexLocker locker(&prefObjPtr->m_mutex);
-			prefObjPtr->m_airplaneMode = json_object_get_boolean(label);
-			Q_EMIT prefObjPtr->signalAirplaneModeChanged(prefObjPtr->m_airplaneMode);
+			bool mode = json_object_get_boolean(label);
+			{
+				MutexLocker locker(&prefObjPtr->m_mutex);
+				prefObjPtr->m_airplaneMode = mode;
+			}
+			Q_EMIT prefObjPtr->signalAirplaneModeChanged(mode);
 		}
 	}
 
@@ -672,18 +694,24 @@ bool Preferences::getPreferencesCallback(LSHandle *sh, LSMessage *message, void 
 	label = json_object_object_get(json, "rotationLock");
 	if (label && json_object_is_type(label, json_type_int)) {
 		if (prefObjPtr) {
-			MutexLocker locker(&prefObjPtr->m_mutex);
-            prefObjPtr->m_rotationLock = (OrientationEvent::Orientation)json_object_get_int(label);
-			Q_EMIT prefObjPtr->signalRotationLockChanged(prefObjPtr->m_rotationLock);
+			OrientationEvent::Orientation lock = (OrientationEvent::Orientation)json_object_get_int(label);
+			{
+				MutexLocker locker(&prefObjPtr->m_mutex);
+				prefObjPtr->m_rotationLock = lock;
+			}
+			Q_EMIT prefObjPtr->signalRotationLockChanged(lock);
 		}
 	}
 
 	label = json_object_object_get(json, "muteSound");
 	if (label && json_object_is_type(label, json_type_boolean)) {
 		if (prefObjPtr) {
-			MutexLocker locker(&prefObjPtr->m_mutex);
-			prefObjPtr->m_muteOn = json_object_get_boolean(label);
-			Q_EMIT prefObjPtr->signalMuteSoundChanged(prefObjPtr->m_muteOn);
+			bool mute = json_object_get_boolean(label);
+			{
+				MutexLocker locker(&prefObjPtr->m_mutex);
+				prefObjPtr->m_muteOn = mute;
+			}
+			Q_EMIT prefObjPtr->signalMuteSoundChanged(mute);
 		}
 	}
 
