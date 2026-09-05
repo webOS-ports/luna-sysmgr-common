@@ -113,6 +113,9 @@ json_object* ApplicationDescriptionBase::getAppDescription() const
     if( json_object_array_length(json_urlAllowed)>0 ) {
         json_object_object_add(json, (char*) "urlsAllowed", json_urlAllowed);
     }
+    else {
+        json_object_put(json_urlAllowed);
+    }
     json_object_object_add(json, (char*) "plugin", json_object_new_string((char *) m_pluginName.c_str()));
     json_object_object_add(json, (char*) "userAgent", json_object_new_string((char *) m_userAgent.c_str()));
     json_object_object_add(json, (char*) "loadingAnimationDisabled", json_object_new_boolean(m_loadingAnimationDisabled));
