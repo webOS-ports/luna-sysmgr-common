@@ -19,7 +19,7 @@
 libdir=@WEBOS_INSTALL_LIBDIR@
 includedir=@WEBOS_INSTALL_INCLUDEDIR@/sysmgr-common
 
-Name: luna-sysmgr-ipc
+Name: LunaSysMgrCommon
 Description: @WEBOS_PROJECT_SUMMARY@
 Version: @WEBOS_COMPONENT_VERSION@
 Libs: -L${libdir} -l@CMAKE_PROJECT_NAME@
