@@ -300,11 +300,29 @@ public:
 	bool                hasBrightnessControl;
 
 	static inline Settings*  LunaSettings() {
-		// A function-local static is initialized exactly once even when two
-		// threads race into the first call (guaranteed since C++11, via a
-		// compiler-generated guard); the old "check pointer, then new" could
-		// construct Settings twice and leak one instance. The pointer is
-		// mirrored into s_settings for code inlined against older headers.
+		// s_settings is checked first and is what makes this correct, for two
+		// reasons; do not drop it in favour of the function-local static alone.
+		//
+		// 1. It is the only part of this singleton every revision of this
+		//    header agrees on. LunaSettings() is inlined into each consumer,
+		//    so a process can mix call sites compiled against an older header
+		//    (which only ever touched s_settings) with call sites compiled
+		//    against this one. s_settings is a single shared symbol; the
+		//    guard below is not, so it can be bypassed entirely by an older
+		//    inlined caller that constructed the instance without it.
+		//
+		// 2. The constructor logs, and logFilter() calls back into here. The
+		//    constructor publishes s_settings before it does anything that
+		//    can log, so that re-entrant call returns here instead of
+		//    re-entering the guard below, which would abort under
+		//    -fno-exceptions (__cxa_guard_acquire throws recursive_init_error
+		//    and there is no handler).
+		if (G_LIKELY(s_settings))
+			return s_settings;
+
+		// First call in this process. The function-local static gives
+		// thread-safe one-time construction (guaranteed since C++11); the
+		// constructor mirrors itself into s_settings for everyone above.
 		static Settings* inst = (s_settings = new Settings());
 		return inst;
 	}
