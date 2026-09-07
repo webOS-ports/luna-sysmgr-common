@@ -273,6 +273,15 @@ Settings::Settings()
 	, hasHomeButton(false)
 	, hasBrightnessControl(true)
 {
+	// Publish ourselves before anything below can log. identifyHardware(),
+	// load() and postLoad() all go through g_log, and logFilter() calls
+	// Settings::LunaSettings() to read logger_level and friends: without
+	// this, that call re-enters the singleton while we are still inside it.
+	// The four fields logFilter() touches are all set by the member
+	// initialiser list above, so the instance it gets back is usable even
+	// though the body has not finished.
+	s_settings = this;
+
 	allSettings = new QHash<QString, QVariant>();
 
 	identifyHardware();
