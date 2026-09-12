@@ -93,12 +93,6 @@ public:
 	int                 backlightOutdoorScale;
 	int                 backlightDimScale;
 	int                 backlightDarkScale;
-
-	/* Multiplier applied to an ALS reading before it is compared against the
-	 * region borders, correcting for the cover glass the sensor sits under.
-	 * Per-device and not derivable from the sensor itself, so a Tier 1
-	 * adaptation sets it through deviceinfo_als_calibration. */
-	double              alsCalibration;
 	
 	int                 displayWidth;
 	int                 displayHeight;
@@ -304,6 +298,19 @@ public:
 	bool                hasPowerButton;
 	bool                hasHomeButton;
 	bool                hasBrightnessControl;
+
+	/* Multiplier applied to an ALS reading before it is compared against the
+	 * region borders, correcting for the cover glass the sensor sits under.
+	 * Per-device and not derivable from the sensor itself, so a Tier 1
+	 * adaptation sets it through deviceinfo_als_calibration.
+	 *
+	 * Deliberately last. This class is a shared-library type reached through
+	 * an inlined LunaSettings(), and LunaAppManager and mediaindexer link the
+	 * library without being rebuilt in lockstep with it. A member added in the
+	 * middle shifts the offset of every member after it, so those consumers
+	 * would read the wrong fields entirely. Appending leaves every existing
+	 * offset alone. New members belong here, not next to related ones. */
+	double              alsCalibration;
 
 	static inline Settings*  LunaSettings() {
 		// s_settings is checked first and is what makes this correct, for two
