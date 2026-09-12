@@ -140,7 +140,11 @@ Settings::Settings()
 	, ledPulseDarkBrightness (50)
 	, enableAls(true)
 	, disableLocking(false)
-	, lockScreenTimeout(5000)
+	// Time the lock screen stays lit before the display switches off. 5s was
+	// far too short to be usable: the screen went dark while the user was still
+	// reaching for it, which reads as "the power key did not turn the screen
+	// on" and leaves no realistic chance to complete a drag-to-unlock.
+	, lockScreenTimeout(60000)
 	, maxPenMoveFreq(30)
 	, maxPaintLoad(6)				       // number of ms for paint routine
 	, maxGestureChangeFreq(30)
