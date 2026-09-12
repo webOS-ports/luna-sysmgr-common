@@ -128,6 +128,11 @@ Settings::Settings()
 	, backlightOutdoorScale (250)
 	, backlightDimScale (30)
 	, backlightDarkScale (10)
+	// 1.0 = take the sensor at its word. Every phone whose ALS sits behind the
+	// cover glass reads low and wants a device-specific figure here; a device
+	// that has not been characterised is better off with an uncorrected
+	// reading than with someone else's correction.
+	, alsCalibration (1.0)
 	, displayWidth(320)
 	, displayHeight(320)
 	, tileWidth(512)
@@ -448,6 +453,7 @@ void Settings::load(const char* settingsFile)
 	KEY_INTEGER("Display", "BrightnessOutdoorScale", backlightOutdoorScale);
 	KEY_INTEGER("Display", "BrightnessDimScale", backlightDimScale);
 	KEY_INTEGER("Display", "BrightnessDarkScale", backlightDarkScale);
+	KEY_DOUBLE("Display", "AlsCalibration", alsCalibration);
 
 	KEY_BOOLEAN("Display", "EnableALS", enableAls);
 	KEY_BOOLEAN("Display", "TurnOffAccelerometerWhenDimmed", turnOffAccelWhenDimmed);

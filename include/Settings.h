@@ -93,6 +93,12 @@ public:
 	int                 backlightOutdoorScale;
 	int                 backlightDimScale;
 	int                 backlightDarkScale;
+
+	/* Multiplier applied to an ALS reading before it is compared against the
+	 * region borders, correcting for the cover glass the sensor sits under.
+	 * Per-device and not derivable from the sensor itself, so a Tier 1
+	 * adaptation sets it through deviceinfo_als_calibration. */
+	double              alsCalibration;
 	
 	int                 displayWidth;
 	int                 displayHeight;
