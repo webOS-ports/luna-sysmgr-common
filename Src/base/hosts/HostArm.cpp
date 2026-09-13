@@ -223,6 +223,12 @@ void HostArm::readALSData() {
 		    return;
         }
 
+        /* The AlsEvent below only reaches a UI process that has a window.
+         * Emit the reading as well so a windowless consumer - the display
+         * manager's AmbientLightSensor - can have it without opening a second
+         * reader on the same descriptor, which would just race this one. */
+        Q_EMIT ambientLightReading(lightVal);
+
         QApplication::postEvent(QApplication::activeWindow(), new AlsEvent(lightVal));
 
         error = nyx_device_release_event(m_nyxHandle, event_handle);
