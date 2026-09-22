@@ -128,6 +128,15 @@ public:
     virtual bool bluetoothKeyboardActive() const { return false; }
 
 Q_SIGNALS:
+
+	/* Raw ambient light reading, in lux, as it comes off the sensor.
+	 *
+	 * readALSData() used to do nothing else with it but post an AlsEvent to
+	 * QApplication::activeWindow(), which is null in a daemon with no window -
+	 * so in luna-displaymanager the reading was drained and dropped. A second
+	 * reader cannot be added to recover it: the descriptor is drained by
+	 * whichever handler runs first, and the other one finds an empty queue. */
+	void ambientLightReading(int lux);
     void signalBluetoothKeyboardActive(bool active);
 
 protected:

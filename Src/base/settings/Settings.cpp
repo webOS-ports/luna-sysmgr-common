@@ -128,6 +128,11 @@ Settings::Settings()
 	, backlightOutdoorScale (250)
 	, backlightDimScale (30)
 	, backlightDarkScale (10)
+	// 1.0 = take the sensor at its word. Every phone whose ALS sits behind the
+	// cover glass reads low and wants a device-specific figure here; a device
+	// that has not been characterised is better off with an uncorrected
+	// reading than with someone else's correction.
+	, alsCalibration (1.0)
 	, displayWidth(320)
 	, displayHeight(320)
 	, tileWidth(512)
@@ -140,7 +145,11 @@ Settings::Settings()
 	, ledPulseDarkBrightness (50)
 	, enableAls(true)
 	, disableLocking(false)
-	, lockScreenTimeout(5000)
+	// Time the lock screen stays lit before the display switches off. 5s was
+	// far too short to be usable: the screen went dark while the user was still
+	// reaching for it, which reads as "the power key did not turn the screen
+	// on" and leaves no realistic chance to complete a drag-to-unlock.
+	, lockScreenTimeout(60000)
 	, maxPenMoveFreq(30)
 	, maxPaintLoad(6)				       // number of ms for paint routine
 	, maxGestureChangeFreq(30)
@@ -444,6 +453,7 @@ void Settings::load(const char* settingsFile)
 	KEY_INTEGER("Display", "BrightnessOutdoorScale", backlightOutdoorScale);
 	KEY_INTEGER("Display", "BrightnessDimScale", backlightDimScale);
 	KEY_INTEGER("Display", "BrightnessDarkScale", backlightDarkScale);
+	KEY_DOUBLE("Display", "AlsCalibration", alsCalibration);
 
 	KEY_BOOLEAN("Display", "EnableALS", enableAls);
 	KEY_BOOLEAN("Display", "TurnOffAccelerometerWhenDimmed", turnOffAccelWhenDimmed);
