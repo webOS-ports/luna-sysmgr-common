@@ -38,7 +38,6 @@
 #endif
 #include <luna-service2/lunaservice.h>
 
-#include <qsocketnotifier.h>
 #include <QObject>
 
 #if defined(USE_KEY_FILTER) || defined(USE_MOUSE_FILTER)
@@ -236,9 +235,7 @@ public:
 
 	virtual const char* hardwareName() const;
 
-	virtual InputControl* getInputControlALS();
 	virtual InputControl* getInputControlBluetoothInputDetect();
-	virtual InputControl* getInputControlProximity();
 	virtual InputControl* getInputControlTouchpanel();
 	virtual InputControl* getInputControlKeys();
 
@@ -261,9 +258,6 @@ protected:
     HostArmQtMouseFilter* m_mouseFilter;
 #endif
 
-	QSocketNotifier* m_nyxLightNotifier;
-	QSocketNotifier* m_nyxProxNotifier;
-
 	virtual void wakeUpLcd();
 
 	virtual int screenX(int rawX, Event::Type type) { return rawX; }
@@ -277,9 +271,7 @@ protected:
 #endif
 	LSHandle* m_service;
 
-	InputControl* m_nyxInputControlALS;
 	InputControl* m_nyxInputControlBluetoothInputDetect;
-	InputControl* m_nyxInputControlProx;
 	InputControl* m_nyxInputControlKeys;
 	InputControl* m_nyxInputControlTouchpanel;
 	LedControl* m_nyxLedControlKeypadAndDisplay;
@@ -315,10 +307,6 @@ protected:
      * @param[in]   - aSensorType - Sensor which has got some data to report
      */
     virtual void NYXDataAvailable (NYXConnectorBase::Sensor aSensorType);
-
-protected Q_SLOTS:
-	void readALSData();
-	void readProxData();
 };
 
 #endif /* HOSTARM_H */

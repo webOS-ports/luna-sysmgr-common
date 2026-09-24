@@ -43,7 +43,6 @@
 #include <QWidget>
 #include <QApplication>
 #include <QKeyEvent>
-#include <qsocketnotifier.h>
 #if defined(USE_MOUSE_FILTER)
 #include <QGraphicsView>
 #endif // USE_MOUSE_FILTER
@@ -88,16 +87,14 @@ static void bluetoothCallback(bool enable)
 #endif
 
 HostArm::HostArm() :
-      m_nyxLightNotifier(NULL)
-	, m_nyxProxNotifier(NULL)
 #if defined(HAS_HIDLIB)
-	, m_hwRev(HidHardwareRevisionEVT1)
+      m_hwRev(HidHardwareRevisionEVT1)
 	, m_hwPlatform (HidHardwarePlatformCastle)
-#endif
 	, m_service(NULL)
-	, m_nyxInputControlALS(0)
+#else
+      m_service(NULL)
+#endif
 	, m_nyxInputControlBluetoothInputDetect(0)
-	, m_nyxInputControlProx(0)
 	, m_nyxInputControlKeys(0)
 	, m_nyxInputControlTouchpanel(0)
 	, m_nyxLedControlKeypadAndDisplay(0)
@@ -154,138 +151,26 @@ nopServiceResponse(LSHandle * /*sh*/, LSMessage * /*reply*/, void * /*ctx*/ )
 
 void HostArm::setupInput(void) {
 
+    /* nyx_init() is all that is left here. The ALS and proximity readers that
+     * used to be set up at this point - a QSocketNotifier each on the nyx
+     * event source, drained by readALSData()/readProxData() - are gone.
+     *
+     * They had no consumer. Both handlers ended in
+     * QApplication::postEvent(QApplication::activeWindow(), ...), and nothing
+     * in the tree has handled an AlsEvent or a ProximityEvent since the
+     * monolithic luna-sysmgr was split up: the display daemon that wants these
+     * readings has no window for activeWindow() to return. The live path for
+     * both sensors is Qt Sensors on top of sensorfw - QAmbientLightSensor in
+     * luna-displaymanager's AmbientLightSensor, QProximitySensor in its
+     * DisplayManager - which works on hybris devices as well as mainline ones.
+     *
+     * Opening them here was therefore pure cost, and on Halium machines it was
+     * also noise: nyx-modules builds neither nyxSensorAlsDefault.module nor
+     * nyxSensorProximityScreen.module there, so every process linking this
+     * library logged NYX_OPEN_ERR for both plus "Failed to open NYX device
+     * 14/21: 3" at startup, for readers whose output was discarded anyway.
+     */
     nyx_init();
-
-    nyx_error_t error = NYX_ERROR_NONE;
-
-    InputControl *ic = getInputControlALS();
-    if (NULL != ic)
-    {
-        nyx_device_handle_t alsHandle = ic->getHandle();
-        if (alsHandle)
-        {
-            int light_source_fd = 0;
-            error = nyx_device_get_event_source(alsHandle, &light_source_fd);
-
-            if (error != NYX_ERROR_NONE)
-            {
-                g_critical("Unable to obtain alsHandle event_source");
-                return;
-            }
-            m_nyxLightNotifier = new QSocketNotifier(light_source_fd, QSocketNotifier::Read, this);
-            connect(m_nyxLightNotifier, SIGNAL(activated(int)), this, SLOT(readALSData()));
-        }
-    }
-
-    ic = getInputControlProximity();
-    if (NULL != ic)
-    {
-        nyx_device_handle_t proxHandle = ic->getHandle();
-        if (proxHandle)
-        {
-            int proximity_source_fd = 0;
-            error = nyx_device_get_event_source(proxHandle, &proximity_source_fd);
-            if (error != NYX_ERROR_NONE)
-            {
-                g_critical("Unable to obtain proxHandle event_source");
-                return;
-            }
-            m_nyxProxNotifier = new QSocketNotifier(proximity_source_fd, QSocketNotifier::Read, this);
-            connect(m_nyxProxNotifier, SIGNAL(activated(int)), this, SLOT(readProxData()));
-        }
-    }
-}
-
-void HostArm::readALSData() {
-
-    nyx_error_t error = NYX_ERROR_NONE;
-    nyx_event_handle_t event_handle = NULL;
-
-    if (m_nyxInputControlALS == NULL) return;
-
-    nyx_device_handle_t m_nyxHandle = m_nyxInputControlALS->getHandle();
-    if (m_nyxHandle == NULL) return;
-
-    error = nyx_device_get_event(m_nyxHandle, &event_handle);
-    if (error != NYX_ERROR_NONE)
-    {
-		g_critical("Unable to obtain m_nyxHandle event");
-		return;
-    }
-
-    while ((error == NYX_ERROR_NONE) && (event_handle != NULL))
-    {
-	    static int lightVal = -1;
-        error = nyx_sensor_als_event_get_intensity(event_handle, &lightVal);
-        if (error != NYX_ERROR_NONE)
-        {
-		    g_critical("Unable to obtain m_nyxLightHandle event intensity");
-		    return;
-        }
-
-        /* The AlsEvent below only reaches a UI process that has a window.
-         * Emit the reading as well so a windowless consumer - the display
-         * manager's AmbientLightSensor - can have it without opening a second
-         * reader on the same descriptor, which would just race this one. */
-        Q_EMIT ambientLightReading(lightVal);
-
-        QApplication::postEvent(QApplication::activeWindow(), new AlsEvent(lightVal));
-
-        error = nyx_device_release_event(m_nyxHandle, event_handle);
-        if (error != NYX_ERROR_NONE)
-        {
-		    g_critical("Unable to release m_nyxLightHandle event");
-		    return;
-        }
-
-        event_handle = NULL;
-        error = nyx_device_get_event(m_nyxHandle, &event_handle);
-    }
-
-}
-
-void HostArm::readProxData() {
-
-    nyx_error_t error = NYX_ERROR_NONE;
-    nyx_event_handle_t event_handle = NULL;
-
-    if (m_nyxInputControlProx == NULL) return;
-
-    nyx_device_handle_t m_nyxHandle = m_nyxInputControlProx->getHandle();
-    if (m_nyxHandle == NULL) return;
-
-    error = nyx_device_get_event(m_nyxHandle, &event_handle);
-    if (error != NYX_ERROR_NONE)
-    {
-		g_critical("Unable to obtain m_nyxHandle event");
-		return;
-    }
-
-    while ((error == NYX_ERROR_NONE) && (event_handle != NULL))
-    {
-	    int presence = 0;
-        error = nyx_sensor_proximity_event_get_presence(event_handle, &presence);
-        if (error != NYX_ERROR_NONE)
-        {
-		    g_critical("Unable to get nyx proximity event");
-		    return;
-        }
-
-
-        luna_log(HOSTARM_LOG, "Proximity sensor event: value: %d", presence);
-        QApplication::postEvent(QApplication::activeWindow(), new ProximityEvent(presence));
-
-        error = nyx_device_release_event(m_nyxHandle, event_handle);
-        if (error != NYX_ERROR_NONE)
-        {
-		    g_critical("Unable to release m_nyxHandle event");
-		    return;
-        }
-
-        event_handle = NULL;
-
-        error = nyx_device_get_event(m_nyxHandle, &event_handle);
-    }
 }
 
 // returns -1 on failure
@@ -321,18 +206,6 @@ void HostArm::shutdownInput(void)
     delete m_OrientationSensor;
     m_OrientationSensor = 0;
 
-	if (m_nyxInputControlALS)
-	{
-		delete m_nyxInputControlALS;
-		m_nyxInputControlALS = NULL;
-	}
-
-	if (m_nyxInputControlProx)
-	{
-		delete m_nyxInputControlProx;
-		m_nyxInputControlProx = NULL;
-	}
-
 	if (m_nyxInputControlTouchpanel)
 	{
 		delete m_nyxInputControlTouchpanel;
@@ -345,11 +218,6 @@ void HostArm::shutdownInput(void)
 		m_nyxInputControlKeys = NULL;
 	}
 
-	delete m_nyxProxNotifier;
-	m_nyxProxNotifier = NULL;
-
-	delete m_nyxLightNotifier;
-	m_nyxLightNotifier = NULL;
 }
 
 void HostArm::startService()
@@ -598,30 +466,6 @@ void HostArm::NYXDataAvailable (NYXConnectorBase::Sensor aSensorType)
         // delete the unUsed event.
         delete e;
     }
-}
-
-InputControl* HostArm::getInputControlALS()
-{
-    if (m_nyxInputControlALS)
-        return m_nyxInputControlALS;
-
-    m_nyxInputControlALS = new NyxInputControl(NYX_DEVICE_SENSOR_ALS, "Default");
-    if (NULL == m_nyxInputControlALS)
-        g_critical("Unable to obtain m_nyxInputControlALS");
-
-    return m_nyxInputControlALS;
-}
-
-InputControl* HostArm::getInputControlProximity()
-{
-    if (m_nyxInputControlProx)
-        return m_nyxInputControlProx;
-
-    m_nyxInputControlProx = new NyxInputControl(NYX_DEVICE_SENSOR_PROXIMITY, "Screen");
-    if (NULL == m_nyxInputControlProx)
-        g_critical("Unable to obtain m_nyxInputControlProx");
-
-    return m_nyxInputControlProx;
 }
 
 InputControl* HostArm::getInputControlTouchpanel()
