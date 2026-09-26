@@ -312,6 +312,38 @@ public:
 	 * offset alone. New members belong here, not next to related ones. */
 	double              alsCalibration;
 
+	/* The panel's shape, for a shell that has to lay out around it.
+	 *
+	 * Cutouts is a ';' separated list of "x y w h" rectangles covering
+	 * everything the UI must keep clear of - notches, punch holes, islands, and
+	 * the rounded corners themselves. They are avoidance areas, not a
+	 * description of the hardware: a corner is a rectangle here because the
+	 * layout only ever needs to know how much room it has lost, and only the
+	 * (optional, cosmetic) corner mask would need the curve.
+	 *
+	 * CornerRadii is "tl;tr;br;bl", the four radii, and exists so the shell can
+	 * compute the inset a corner really costs at the height its icons sit at
+	 * rather than being told the full radius.
+	 *
+	 * Both in physical pixels, origin top-left, in the orientation the shell
+	 * lays out in - which is NOT necessarily the panel's scanout orientation.
+	 * luneos-device-config's 50-luna-platform generator applies the same
+	 * quarter-turn swap it applies to DisplayWidth/DisplayHeight before writing
+	 * these, so that a panel mounted sideways (the MP01's r270) needs no second
+	 * correction up here.
+	 *
+	 * Empty is the normal case and means "an ordinary rectangular panel" - every
+	 * device without an adaptation that declares otherwise.
+	 *
+	 * Strings, not parsed structures, on purpose: this is a shared-library type
+	 * with the ABI note below, and the only consumer that wants rectangles is
+	 * Qt-side (LunaNext.Common's SettingsAdapter), which can parse them into
+	 * QRects far more naturally than this header can carry them.
+	 *
+	 * Appended, for the reason alsCalibration gives above. */
+	std::string         displayCutouts;
+	std::string         displayCornerRadii;
+
 	static inline Settings*  LunaSettings() {
 		// s_settings is checked first and is what makes this correct, for two
 		// reasons; do not drop it in favour of the function-local static alone.

@@ -281,6 +281,11 @@ Settings::Settings()
 	, hasPowerButton(true)
 	, hasHomeButton(false)
 	, hasBrightnessControl(true)
+	// An ordinary rectangular panel until an adaptation says otherwise. Empty is
+	// not a missing value here, it is the answer for most devices. Last, matching
+	// where Settings.h declares them and why.
+	, displayCutouts ("")
+	, displayCornerRadii ("")
 {
 	// Publish ourselves before anything below can log. identifyHardware(),
 	// load() and postLoad() all go through g_log, and logFilter() calls
@@ -454,6 +459,8 @@ void Settings::load(const char* settingsFile)
 	KEY_INTEGER("Display", "BrightnessDimScale", backlightDimScale);
 	KEY_INTEGER("Display", "BrightnessDarkScale", backlightDarkScale);
 	KEY_DOUBLE("Display", "AlsCalibration", alsCalibration);
+	KEY_STRING("Display", "Cutouts", displayCutouts);
+	KEY_STRING("Display", "CornerRadii", displayCornerRadii);
 
 	KEY_BOOLEAN("Display", "EnableALS", enableAls);
 	KEY_BOOLEAN("Display", "TurnOffAccelerometerWhenDimmed", turnOffAccelWhenDimmed);
