@@ -65,6 +65,21 @@ class CoreNaviLeds {
         void ledSeesaw(int brightness, int fadeTime, bool reverse = false);
 	void ledFadeOff (int brightness, int fadeTime, bool goLeft);
 
+        /*
+         * Colour of the core LEDs, one 0-255 channel each, applied to every
+         * effect started from here on until it is changed again. -1 on a
+         * channel, or setColor(-1,-1,-1), means "no preference": the LED
+         * controller then behaves exactly as it did before colour existed,
+         * which is what a single-colour LED wants.
+         *
+         * nyx scales the colour by the effect's brightness, so an effect that
+         * leaves brightness at its default of 0 stays dark whatever colour is
+         * set here. Every effect below that takes a brightness already passes
+         * one.
+         */
+        void setColor(int red, int green, int blue);
+        void clearColor();
+
         static CoreNaviLeds* m_instance;
         static CoreNaviLeds* instance ();
 
@@ -75,6 +90,11 @@ class CoreNaviLeds {
         void configureParameters(int n, ...);
         void initializeEffect(nyx_led_controller_effect_type_t effect_type, int led);
         void finalizeAndExecute();
+        void applyColorParameters();
+
+        int m_colorRed;
+        int m_colorGreen;
+        int m_colorBlue;
 
         nyx_led_controller_core_configuration_handle_t m_config;
         nyx_led_controller_effect_t m_effect;

@@ -29,6 +29,9 @@ CoreNaviLeds* CoreNaviLeds::m_instance = NULL;
 
 CoreNaviLeds::CoreNaviLeds() :
     m_config(NULL)
+    ,m_colorRed(NYX_LED_CONTROLLER_CORE_COLOUR_UNSET)
+    ,m_colorGreen(NYX_LED_CONTROLLER_CORE_COLOUR_UNSET)
+    ,m_colorBlue(NYX_LED_CONTROLLER_CORE_COLOUR_UNSET)
     ,m_lightbarEnabled(Settings::LunaSettings()->lightbarEnabled)
     ,m_device(NULL)
 {
@@ -62,6 +65,54 @@ CoreNaviLeds::~CoreNaviLeds()
     }
 }
 
+/*
+ * A channel outside 0-255 is taken as "unset" rather than clamped: nyx-lib
+ * rejects an out-of-range channel outright, and silently turning a caller's
+ * mistake into full-scale red would be worse than ignoring it.
+ */
+static int sanitizeColorChannel(int value)
+{
+    if (value < 0 || value > NYX_LED_CONTROLLER_CORE_COLOUR_MAX)
+        return NYX_LED_CONTROLLER_CORE_COLOUR_UNSET;
+
+    return value;
+}
+
+void CoreNaviLeds::setColor(int red, int green, int blue)
+{
+    m_colorRed   = sanitizeColorChannel(red);
+    m_colorGreen = sanitizeColorChannel(green);
+    m_colorBlue  = sanitizeColorChannel(blue);
+}
+
+void CoreNaviLeds::clearColor()
+{
+    setColor(NYX_LED_CONTROLLER_CORE_COLOUR_UNSET,
+             NYX_LED_CONTROLLER_CORE_COLOUR_UNSET,
+             NYX_LED_CONTROLLER_CORE_COLOUR_UNSET);
+}
+
+/*
+ * Pushed in just before the configuration is finalized, so that the colour
+ * outlives any single effect call and every effect picks it up without having
+ * to grow three more arguments.
+ *
+ * Nothing is written when no colour is set, which leaves the configuration
+ * carrying the UNSET nyx-lib gave it.
+ */
+void CoreNaviLeds::applyColorParameters()
+{
+    if (m_colorRed == NYX_LED_CONTROLLER_CORE_COLOUR_UNSET &&
+        m_colorGreen == NYX_LED_CONTROLLER_CORE_COLOUR_UNSET &&
+        m_colorBlue == NYX_LED_CONTROLLER_CORE_COLOUR_UNSET)
+        return;
+
+    configureParameters( 6,
+                        NYX_LED_CONTROLLER_CORE_EFFECT_COLOUR_RED, m_colorRed,
+                        NYX_LED_CONTROLLER_CORE_EFFECT_COLOUR_GREEN, m_colorGreen,
+                        NYX_LED_CONTROLLER_CORE_EFFECT_COLOUR_BLUE, m_colorBlue);
+}
+
 void CoreNaviLeds::configureParameters(int n, ...)
 {
     va_list ap;
@@ -87,6 +138,8 @@ void CoreNaviLeds::configureParameters(int n, ...)
 
 void CoreNaviLeds::finalizeAndExecute()
 {
+    applyColorParameters();
+
     nyx_error_t error = nyx_led_controller_core_configuration_finalize(m_config);
 
     if (error != NYX_ERROR_NONE)
@@ -387,10 +440,30 @@ void CoreNaviLeds::ledFadeOff (int brightness, int fadeTime, bool goLeft)
 
 void CoreNaviLeds::stopAll() 
 {
-    nyx_led_controller_stop(m_device, (nyx_led_controller_led_t)(Left() | Right() | Center()));
+    stopAll(Left() | Right() | Center());
 }
 
+/*
+ * Ask nyx to stop the effect, then drive the LED dark ourselves.
+ *
+ * The second step is not belt-and-braces: the LED controller module registers
+ * only execute_effect and get_state, so nyx_led_controller_stop() resolves to
+ * nothing and returns NYX_ERROR_NOT_IMPLEMENTED on every device we ship. Left
+ * at that, a pulsing notification LED would keep pulsing after the notification
+ * was cleared. LED_SET at brightness 0 is a request the module does honour.
+ *
+ * The stop call is kept because it costs nothing and is the right call for any
+ * module that does implement it; its error is deliberately not logged as a
+ * failure, since NOT_IMPLEMENTED is the expected answer here.
+ *
+ * The colour is cleared first so that the effect carries no colour of its own:
+ * with brightness 0 the resolved channels are 0 regardless, but leaving a stale
+ * colour behind would apply it to whatever effect ran next.
+ */
 void CoreNaviLeds::stopAll(int led) 
 {
     nyx_led_controller_stop(m_device, (nyx_led_controller_led_t)led);
+
+    clearColor();
+    ledSet(led, 0);
 }
