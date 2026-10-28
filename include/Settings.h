@@ -60,7 +60,7 @@ public:
 	std::string         lunaSystemLocalePath;	// default >> /usr/palm/sysmgr/localization
 	std::string         lunaCustomizationLocalePath; // default >> /usr/palm/sysmgr-cust/localization
 	std::string         lunaPrefsPath;      // default >> /var/luna/preferences
-	std::string         lunaCmdHandlerPath;	// default >> /usr/palm/command-resource-handlers.json
+	std::string         lunaCmdHandlerPath;	// default >> /etc/palm/command-resource-handlers.json
 	std::string         lunaCmdHandlerSavedPath;	//default >> /var/usr/palm/command-resource-handlers-active.json
 	std::string         lunaQmlUiComponentsPath;	//default >> /usr/palm/sysmgr/uiComponents
 	std::string         lunaScreenCapturesPath;         // default >> /media/internal/screencaptures
