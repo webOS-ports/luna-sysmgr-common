@@ -103,6 +103,13 @@ bool NyxLedControl::setBrightness(int keypadBrightness, int displayBrightness, L
         return (error == NYX_ERROR_NONE || error == NYX_ERROR_NOT_IMPLEMENTED);
     }
 
+    // No LED controller was opened, so nyx will never call back. The caller is
+    // waiting for the callback all the same: DisplayManager counts the
+    // backlight as on or off only from there, as it does when a host has no
+    // LED control at all.
+    if (callback)
+        callback(ctx);
+
     return true;
 }
 
