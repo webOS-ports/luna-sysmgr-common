@@ -84,7 +84,9 @@ HostBase::HostBase()
 	sInstance = this;
 	memset(&m_info, 0, sizeof(HostInfo));
 
-	m_mainCtxt = g_main_context_default();
+	// g_main_context_default() hands out no reference of its own; the unref in
+	// the destructor is for this one, or it would free the default context
+	m_mainCtxt = g_main_context_ref(g_main_context_default());
 
 	// This mainloop is a dummy. It's sole purpose is to provide a mechanism to get to
 	// the GMainContext for compatibility with luna-service and other glib based 3rd party
