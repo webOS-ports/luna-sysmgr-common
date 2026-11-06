@@ -37,22 +37,22 @@ public:
 		EaseInOut
 	};
 
-	static PValue easeLinear(PValue time, PValue initial, PValue final, PValue duration, PValue strength) {
+	static PValue easeLinear(PValue time, PValue initial, PValue final, PValue duration, PValue /*strength*/) {
 		time = time / duration;
 		return initial + (final - initial) * time;
 	}
 
-	static PValue easeInQuad(PValue time, PValue initial, PValue final, PValue duration, PValue strength) {
+	static PValue easeInQuad(PValue time, PValue initial, PValue final, PValue duration, PValue /*strength*/) {
 		time = time / duration;
 		return initial + (final - initial) * (time * time);
 	}
 
-	static PValue easeInCubic(PValue time, PValue initial, PValue final, PValue duration, PValue strength) {
+	static PValue easeInCubic(PValue time, PValue initial, PValue final, PValue duration, PValue /*strength*/) {
 		time = time / duration;
 		return initial + (final - initial) * (time * time * time);
 	}
 
-	static PValue easeInQuat(PValue time, PValue initial, PValue final, PValue duration, PValue strength) {
+	static PValue easeInQuat(PValue time, PValue initial, PValue final, PValue duration, PValue /*strength*/) {
 		time = time / duration;
 		return initial + (final - initial) * (time * time * time * time);
 	}
@@ -62,17 +62,17 @@ public:
 		return initial + (final - initial) * (time ^ (strength / 10));
 	}
 	
-	static PValue easeOutQuad(PValue time, PValue initial, PValue final, PValue duration, PValue strength) {
+	static PValue easeOutQuad(PValue time, PValue initial, PValue final, PValue duration, PValue /*strength*/) {
 		time = PValue(1) - time / duration;
 		return initial + (final - initial) * (PValue(1) - time * time);
 	}
 
-	static PValue easeOutCubic(PValue time, PValue initial, PValue final, PValue duration, PValue strength) {
+	static PValue easeOutCubic(PValue time, PValue initial, PValue final, PValue duration, PValue /*strength*/) {
 		time = PValue(1) - time / duration;
 		return initial + (final - initial) * (PValue(1) - time * time * time);
 	}
 
-	static PValue easeOutQuat(PValue time, PValue initial, PValue final, PValue duration, PValue strength) {
+	static PValue easeOutQuat(PValue time, PValue initial, PValue final, PValue duration, PValue /*strength*/) {
 		time = PValue(1) - time / duration;
 		return initial + (final - initial) * (PValue(1) - time * time * time * time);
 	}
